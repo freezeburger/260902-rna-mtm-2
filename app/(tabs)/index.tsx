@@ -9,6 +9,9 @@ import { ThemedView } from '@/components/themed-view';
 import React, { useMemo } from 'react';
 
 
+import Title from '@/components/Title';
+
+
 /**
  * Header background color theme for light and dark modes.
  * Color are set for standard and private application.
@@ -43,7 +46,10 @@ function HomeScreen( props :any) {
         />
       }>
 
+
+
       <ThemedView style={styles.titleContainer}>
+        <Title content="Welcome!" />
         <ThemedText type="title">Welcome!</ThemedText>
         <HelloWave />
       </ThemedView>
