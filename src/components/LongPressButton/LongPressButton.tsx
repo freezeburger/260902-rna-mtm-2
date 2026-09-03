@@ -82,6 +82,7 @@ const LongPressButton:FC<LongPressButtonProps> = ({
           style={[
             styles.container,
             appearance === 'circular' ? styles.circular : styles.regular,
+            appearance === 'regular' && styles.rectangular,
             styles[size],
             { borderColor: colors.border },
             disabled && { opacity: 0.45 },

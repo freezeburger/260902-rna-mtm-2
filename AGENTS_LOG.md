@@ -83,3 +83,11 @@
   d'appui long pour sécuriser `Place order` et `Save changes`, tandis que
   l'action circulaire reste utilisée sur `Discover`.
 - **Commentaire Git suggéré :** `feat: require long press for order and settings confirmation`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/LongPressButton/`
+- **Description :** Élargissement de la variante rectangulaire du bouton
+  d'appui long afin qu'elle occupe toute la largeur disponible pour les actions
+  `Place order` et `Save changes`, conformément à la maquette.
+- **Commentaire Git suggéré :** `style: widen rectangular long press actions`

@@ -21,6 +21,10 @@ export const styles = StyleSheet.create({
     minHeight: 48,
     paddingHorizontal: 24,
   },
+  rectangular: {
+    alignSelf: 'stretch',
+    width: '100%',
+  },
   small: {
     minHeight: 36,
     paddingHorizontal: 16,
