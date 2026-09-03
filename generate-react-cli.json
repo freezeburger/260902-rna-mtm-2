@@ -21,6 +21,7 @@
       }
     },
     "feature": {
+      "$command":"npx generate-react-cli component NAME --type=feature",
       "path": "src/features",
       "withIndex": true,
       "withTypes": true,
@@ -36,6 +37,7 @@
       }
     },
     "hook": {
+      "$command":"npx generate-react-cli component NAME --type=hook --flat",
       "path": "src/hooks",
       "withStyle": false,
       "withTest": false,
@@ -46,6 +48,7 @@
       }
     },
     "screen": {
+      "$command":"npx generate-react-cli component NAME --type=screen --flat",
       "path": "src/screens",
       "withStyle": false,
       "withTest": false,
@@ -56,6 +59,7 @@
       }
     },
     "service": {
+      "$command":"npx generate-react-cli component NAME --type=service --flat",
       "path": "src/services",
       "withStyle": false,
       "withTest": false,
