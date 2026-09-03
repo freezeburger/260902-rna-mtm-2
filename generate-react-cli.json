@@ -19,6 +19,51 @@
         "index": "templates/components/index.tsx",
         "types": "templates/components/TemplateName.types.tsx"
       }
+    },
+    "feature": {
+      "path": "src/features",
+      "withIndex": true,
+      "withTypes": true,
+      "withStyle": true,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false,
+      "customTemplates": {
+        "component": "templates/feature/TemplateName.tsx",
+        "style": "templates/feature/TemplateName.stylesheet.tsx",
+        "index": "templates/feature/index.tsx",
+        "types": "templates/feature/TemplateName.types.tsx"
+      }
+    },
+    "hook": {
+      "path": "src/hooks",
+      "withStyle": false,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false,
+      "customTemplates": {
+        "component": "templates/hook/TemplateName.hook.tsx"
+      }
+    },
+    "screen": {
+      "path": "src/screens",
+      "withStyle": false,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false,
+      "customTemplates": {
+        "component": "templates/screen/TemplateNameScreen.tsx"
+      }
+    },
+    "service": {
+      "path": "src/services",
+      "withStyle": false,
+      "withTest": false,
+      "withStory": false,
+      "withLazy": false,
+      "customTemplates": {
+        "component": "templates/service/TemplateName.service.tsx"
+      }
     }
   }
 }
