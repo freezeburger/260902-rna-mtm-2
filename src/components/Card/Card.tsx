@@ -3,33 +3,36 @@
 import React, { type FC } from 'react';
 
 /** React Native Imports */
-import { Text } from 'react-native';
+import { View } from 'react-native';
 
 /** External Libraries Imports */
 
 /** Hooks Imports */
-import * as Hooks from '@/hooks';
+import { useAppTheme } from '@/src/hooks';
 
 /** Local Imports */
 import { styles } from './Card.stylesheet';
 import type { CardProps } from './Card.types';
 
-const Card:FC<CardProps> = ({ content }) => {
+const Card:FC<CardProps> = ({ children, style }) => {
+  const { colors } = useAppTheme();
+
   return (
-    <Text style={styles.container}>{content}</Text>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.surface, borderColor: colors.border },
+        style,
+      ]}>
+      {children}
+    </View>
   );
 };
 
 /**
  * Memoized version of the Card component to prevent unnecessary re-renders.
  */
-const CardMemoized = React.memo(Card, (prevProps, nextProps) => {
-    /**
-     * Determines whether the component should re-render based on prop changes.
-     */
-    // return prevProps.content === nextProps.content;
-    return true // uncomment to compute render conditionnally
-});
+const CardMemoized = React.memo(Card);
 CardMemoized.displayName = 'CardMemoized';
 
 export default CardMemoized;

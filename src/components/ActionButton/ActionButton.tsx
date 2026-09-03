@@ -3,33 +3,49 @@
 import React, { type FC } from 'react';
 
 /** React Native Imports */
-import { Text } from 'react-native';
+import { Pressable } from 'react-native';
 
 /** External Libraries Imports */
+import { Ionicons } from '@expo/vector-icons';
 
 /** Hooks Imports */
-import * as Hooks from '@/hooks';
+import { useAppTheme } from '@/src/hooks';
 
 /** Local Imports */
 import { styles } from './ActionButton.stylesheet';
 import type { ActionButtonProps } from './ActionButton.types';
 
-const ActionButton:FC<ActionButtonProps> = ({ content }) => {
+const VARIANT_BACKGROUND: Record<NonNullable<ActionButtonProps['variant']>, keyof ReturnType<typeof useAppTheme>['colors']> = {
+  default: 'surface',
+  primary: 'primary',
+  danger: 'danger',
+};
+
+const ActionButton:FC<ActionButtonProps> = ({ icon, accessibilityLabel, onPress, variant = 'default', disabled = false }) => {
+  const { colors } = useAppTheme();
+  const iconColor = variant === 'default' ? colors.text : '#FFFFFF';
+
   return (
-    <Text style={styles.container}>{content}</Text>
+    <Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.container,
+        { backgroundColor: colors[VARIANT_BACKGROUND[variant]], borderColor: colors.border },
+        pressed && styles.pressed,
+        disabled && styles.disabled,
+      ]}>
+      <Ionicons name={icon} size={28} color={iconColor} />
+    </Pressable>
   );
 };
 
 /**
  * Memoized version of the ActionButton component to prevent unnecessary re-renders.
  */
-const ActionButtonMemoized = React.memo(ActionButton, (prevProps, nextProps) => {
-    /**
-     * Determines whether the component should re-render based on prop changes.
-     */
-    // return prevProps.content === nextProps.content;
-    return true // uncomment to compute render conditionnally
-});
+const ActionButtonMemoized = React.memo(ActionButton);
 ActionButtonMemoized.displayName = 'ActionButtonMemoized';
 
 export default ActionButtonMemoized;

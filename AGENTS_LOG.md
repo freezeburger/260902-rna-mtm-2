@@ -22,3 +22,38 @@
   `generate-react-cli`, puis ajout d'un comportement pressable, des tailles
   `regular` et `small`, de l'état désactivé et des propriétés d'accessibilité.
 - **Commentaire Git suggéré :** `feat: add reusable button component`
+
+## 2026-09-03
+
+- **Fichiers :**
+  - `src/types/index.tsx`, `src/data/products.ts` (nouveau), `src/store/AppStateContext.tsx` (nouveau),
+    `src/store/selectors.ts` (nouveau)
+  - `src/hooks/AppState.hook.tsx`, `src/hooks/AppTheme.hook.tsx`, `src/hooks/DiscoverQueue.hook.tsx`,
+    `src/hooks/OrderSummary.hook.tsx` (générés via `generate-react-cli` puis implémentés), `src/hooks/index.tsx`,
+    `src/hooks/use-theme-color.ts`
+  - `constants/theme.ts`
+  - `src/components/{Header,ContentCard,SwipeCard,Fieldset,Input,Switch,NumericInput,Badge,ListItem,EmptyState}/*`
+    (générés via `generate-react-cli component NAME --type=default` puis implémentés),
+    `src/components/{Card,ActionButton,Title,Button,LongPressButton}/*` (finalisation des composants déjà générés)
+  - `src/screens/{SplashScreen,LoginScreen,DiscoverScreen,FavoritesScreen,ProductsScreen,OrdersScreen,SettingsScreen}.tsx`
+    (générés via `generate-react-cli component NAME --type=screen --flat` puis implémentés)
+  - `app/index.tsx` (nouveau), `app/login.tsx` (nouveau), `app/_layout.tsx`,
+    `app/(tabs)/_layout.tsx`, `app/(tabs)/index.tsx`, `app/(tabs)/{favorites,products,orders,settings}.tsx` (nouveaux)
+- **Description :** Implémentation complète du MVP Product Swipe conformément à
+  `documentation/0_WORK_PLAN.md` et `documentation/0_APPLICATION.md` : état
+  partagé (`AppStateContext` + reducer, sans dépendance ajoutée) pour le nom
+  utilisateur, le catalogue produit local, les favoris, les produits ignorés,
+  la progression de `Discover`, la commande en cours et l'historique des
+  commandes ; thème clair/sombre cohérent piloté par un réglage utilisateur
+  dans `Settings` (et non plus uniquement par le thème système) ; parcours
+  `Splash → Login → (tabs)` avec les cinq onglets `Discover`, `Favorites`,
+  `Products`, `Orders`, `Settings` ; `Discover` avec suivant / favori / ignorer
+  (validation par appui long via `LongPressButton`) et état vide en fin de
+  liste ; `Favorites` avec état vide et bouton `Order` ; `Products` en
+  `FlatList` avec recherche et produits ignorés atténués ; `Orders` avec
+  quantité, total calculé et confirmation ; `Settings` avec nom, quantité par
+  défaut, notifications et mode sombre. Correction au passage des imports
+  `@/hooks/*` restés incorrects après le déplacement des hooks vers
+  `src/hooks`, tightly couplés au thème mis en place.
+- **Commentaire Git suggéré :** `feat: implement Product Swipe MVP screens, shared state and theme`
+

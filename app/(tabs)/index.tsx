@@ -1,20 +1,3 @@
-import { StyleSheet, View } from 'react-native';
+import DiscoverScreen from '@/src/screens/DiscoverScreen';
 
-import Title from '@/src/components/Title';
-
-export default function DiscoverScreen() {
-  return (
-    <View style={styles.container}>
-      <Title content="Discover" />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-});
+export default DiscoverScreen;

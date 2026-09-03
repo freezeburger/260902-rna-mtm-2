@@ -8,7 +8,7 @@ import { Pressable, Text } from 'react-native';
 /** External Libraries Imports */
 
 /** Hooks Imports */
-import * as Hooks from '@/src/hooks';
+import { useAppTheme } from '@/src/hooks';
 
 /** Local Imports */
 import { styles } from './Button.stylesheet';
@@ -21,13 +21,15 @@ const Button:FC<ButtonProps> = ({
   disabled = false,
   accessibilityLabel,
 }) => {
+  const { colors } = useAppTheme();
+
   return (
     <Pressable
       accessibilityLabel={accessibilityLabel ?? content}
       accessibilityRole="button"
       disabled={disabled}
       onPress={onPress}
-      style={[styles.container, styles[size], disabled && styles.disabled]}>
+      style={[styles.container, { backgroundColor: colors.primary }, styles[size], disabled && styles.disabled]}>
       <Text style={styles.label}>{content}</Text>
     </Pressable>
   );

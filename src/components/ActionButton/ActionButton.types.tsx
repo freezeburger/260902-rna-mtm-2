@@ -1,8 +1,13 @@
 /**
  * Import Application Types
  */
-import * as Types from '@/src/types'
+import type { ComponentProps } from 'react';
+import type { Ionicons } from '@expo/vector-icons';
 
 export type ActionButtonProps = {
-  content: string;
+  icon: ComponentProps<typeof Ionicons>['name'];
+  accessibilityLabel: string;
+  onPress: () => void;
+  variant?: 'default' | 'primary' | 'danger';
+  disabled?: boolean;
 };

@@ -16,6 +16,17 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    /** Additional tokens used by the Product Swipe design system. */
+    primary: '#1473E6',
+    primaryMuted: '#E4EEFC',
+    surface: '#FFFFFF',
+    surfaceAlt: '#F3F5F7',
+    border: '#E2E5E9',
+    textMuted: '#6B7280',
+    success: '#2E7D32',
+    danger: '#D32F2F',
+    warning: '#B26A00',
+    overlay: 'rgba(17, 24, 28, 0.4)',
   },
   dark: {
     text: '#ECEDEE',
@@ -24,6 +35,17 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    /** Additional tokens used by the Product Swipe design system. */
+    primary: '#4E9CE8',
+    primaryMuted: '#1C2C3D',
+    surface: '#1D2022',
+    surfaceAlt: '#242729',
+    border: '#33383B',
+    textMuted: '#9BA1A6',
+    success: '#5DBE63',
+    danger: '#EF6B6B',
+    warning: '#E2A33D',
+    overlay: 'rgba(0, 0, 0, 0.6)',
   },
 };
 
