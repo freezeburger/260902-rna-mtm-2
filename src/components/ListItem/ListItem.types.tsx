@@ -9,5 +9,8 @@ export type ListItemProps = {
   isFavorite?: boolean;
   isIgnored?: boolean;
   onPress?: () => void;
+  onFavorite?: () => void;
+  onOrder?: () => void;
+  onIgnore?: () => void;
   right?: ReactNode;
 };

@@ -5,9 +5,42 @@ import { StyleSheet } from 'react-native';
 export const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    borderBottomWidth: 1,
     flexDirection: 'row',
     paddingVertical: 12,
+  },
+  row: {
+    marginBottom: 1,
+    overflow: 'hidden',
+  },
+  actions: {
+    alignItems: 'stretch',
+    bottom: 1,
+    flexDirection: 'row',
+    position: 'absolute',
+    right: 0,
+    top: 0,
+  },
+  action: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+  },
+  actionLabel: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  favoriteAction: {
+    backgroundColor: '#1E88E5',
+  },
+  orderAction: {
+    backgroundColor: '#168A4A',
+  },
+  ignoreAction: {
+    backgroundColor: '#D14343',
+  },
+  foreground: {
+    backgroundColor: '#FFFFFF',
   },
   ignored: {
     opacity: 0.55,

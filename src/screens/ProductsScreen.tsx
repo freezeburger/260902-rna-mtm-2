@@ -7,6 +7,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 
 /** External Libraries Imports */
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
 /** Hooks Imports */
 import { useAppState, useAppTheme } from '@/src/hooks';
@@ -20,7 +21,8 @@ import { selectIsFavorite, selectIsIgnored } from '@/src/store/selectors';
 
 const ProductsScreen:FC = () => {
   const { colors } = useAppTheme();
-  const { state } = useAppState();
+  const { state, addFavorite, ignoreProduct, selectProductForOrder } = useAppState();
+  const router = useRouter();
   const [query, setQuery] = useState('');
 
   const filteredProducts = useMemo(() => {
@@ -55,6 +57,12 @@ const ProductsScreen:FC = () => {
               product={item}
               isFavorite={selectIsFavorite(state, item.id)}
               isIgnored={selectIsIgnored(state, item.id)}
+              onFavorite={() => addFavorite(item.id)}
+              onIgnore={() => ignoreProduct(item.id)}
+              onOrder={() => {
+                selectProductForOrder(item.id);
+                router.push('/(tabs)/orders');
+              }}
             />
           )}
         />

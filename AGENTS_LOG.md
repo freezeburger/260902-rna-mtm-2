@@ -57,3 +57,10 @@
   `src/hooks`, tightly couplés au thème mis en place.
 - **Commentaire Git suggéré :** `feat: implement Product Swipe MVP screens, shared state and theme`
 
+## 2026-09-03
+
+- **Fichiers :** `src/components/ListItem/`, `src/screens/ProductsScreen.tsx`
+- **Description :** Ajout d'une révélation d'actions par glissement vers la
+  gauche dans la liste des produits, avec les actions `Favorite`, `Order` et
+  `Ignore` reliées à l'état partagé et au parcours de commande.
+- **Commentaire Git suggéré :** `feat: add swipe actions to product list`
