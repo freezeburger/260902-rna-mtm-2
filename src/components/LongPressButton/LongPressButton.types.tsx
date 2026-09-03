@@ -1,7 +1,7 @@
 /**
  * Import Application Types
  */
-import * as Types from '@/types'
+import * as Types from '@/src/types'
 
 export type LongPressButtonProps = Types.WithTextContent & Types.WithSize & Partial<Types.Actionable> & {
     /**

@@ -14,3 +14,11 @@
   `generate-react-cli.json`, afin de conserver les templates et conventions du
   projet.
 - **Commentaire Git suggéré :** `docs: require boilerplate generation commands`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/Button/`
+- **Description :** Génération du composant `Button` avec le template
+  `generate-react-cli`, puis ajout d'un comportement pressable, des tailles
+  `regular` et `small`, de l'état désactivé et des propriétés d'accessibilité.
+- **Commentaire Git suggéré :** `feat: add reusable button component`

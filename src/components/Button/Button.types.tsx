@@ -1,7 +1,9 @@
 /**
  * Import Application Types
  */
-import * as Types from '@/types'
+import type { PressableProps } from 'react-native';
 
-export type ButtonProps = Types.WithTextContent & Types.WithSize & Partial<Types.Actionable>;
-
+export type ButtonProps = {
+  content: string;
+  size?: 'regular' | 'small';
+} & Pick<PressableProps, 'onPress' | 'disabled' | 'accessibilityLabel'>;

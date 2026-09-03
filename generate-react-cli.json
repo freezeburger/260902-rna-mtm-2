@@ -6,6 +6,7 @@
   "testLibrary": "None",
   "component": {
     "default": {
+      "$command":"npx generate-react-cli component NAME --type=default",
       "path": "src/components",
       "withIndex": true,
       "withTypes": true,
