@@ -24,7 +24,7 @@ import { styles } from './LongPressButton.stylesheet';
 import type { LongPressButtonProps } from './LongPressButton.types';
 
 /** Duration (in ms) required to hold the button before the action is validated. */
-const VALIDATION_DURATION = 2000;
+const VALIDATION_DURATION = 1200;
 
 const LongPressButton:FC<LongPressButtonProps> = ({
   content,

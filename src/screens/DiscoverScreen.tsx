@@ -39,7 +39,13 @@ const DiscoverScreen:FC = () => {
           />
         ) : (
           <>
-            <SwipeCard product={currentProduct} />
+            <SwipeCard
+              product={currentProduct}
+              leftColor={colors.danger}
+              onSwipeLeft={next}
+              onSwipeRight={favorite}
+              rightColor={colors.primary}
+            />
             <View style={styles.actions}>
               <ActionButton
                 icon="arrow-back"

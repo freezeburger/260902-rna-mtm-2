@@ -32,6 +32,7 @@ type Action =
   | { type: 'DISCOVER_NEXT' }
   | { type: 'DISCOVER_RESTART' }
   | { type: 'ADD_FAVORITE'; productId: string }
+  | { type: 'REMOVE_FAVORITE'; productId: string }
   | { type: 'IGNORE_PRODUCT'; productId: string }
   | { type: 'UNIGNORE_PRODUCT'; productId: string }
   | { type: 'SELECT_PRODUCT_FOR_ORDER'; productId: string }
@@ -60,6 +61,12 @@ function reducer(state: AppState, action: Action): AppState {
           ? state.favoriteProductIds
           : [...state.favoriteProductIds, action.productId],
         discoverIndex: state.discoverIndex + 1,
+      };
+
+    case 'REMOVE_FAVORITE':
+      return {
+        ...state,
+        favoriteProductIds: state.favoriteProductIds.filter((productId) => productId !== action.productId),
       };
 
     case 'IGNORE_PRODUCT':
@@ -124,6 +131,7 @@ export type AppStateContextValue = {
   discoverNext: () => void;
   discoverRestart: () => void;
   addFavorite: (productId: string) => void;
+  removeFavorite: (productId: string) => void;
   ignoreProduct: (productId: string) => void;
   unignoreProduct: (productId: string) => void;
   selectProductForOrder: (productId: string) => void;
@@ -141,6 +149,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const discoverNext = useCallback(() => dispatch({ type: 'DISCOVER_NEXT' }), []);
   const discoverRestart = useCallback(() => dispatch({ type: 'DISCOVER_RESTART' }), []);
   const addFavorite = useCallback((productId: string) => dispatch({ type: 'ADD_FAVORITE', productId }), []);
+  const removeFavorite = useCallback((productId: string) => dispatch({ type: 'REMOVE_FAVORITE', productId }), []);
   const ignoreProduct = useCallback((productId: string) => dispatch({ type: 'IGNORE_PRODUCT', productId }), []);
   const unignoreProduct = useCallback((productId: string) => dispatch({ type: 'UNIGNORE_PRODUCT', productId }), []);
   const selectProductForOrder = useCallback(
@@ -162,6 +171,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
       discoverNext,
       discoverRestart,
       addFavorite,
+      removeFavorite,
       ignoreProduct,
       unignoreProduct,
       selectProductForOrder,
@@ -169,7 +179,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
       placeOrder,
       updateSettings,
     }),
-    [state, setUsername, discoverNext, discoverRestart, addFavorite, ignoreProduct, unignoreProduct, selectProductForOrder, setOrderQuantity, placeOrder, updateSettings],
+    [state, setUsername, discoverNext, discoverRestart, addFavorite, removeFavorite, ignoreProduct, unignoreProduct, selectProductForOrder, setOrderQuantity, placeOrder, updateSettings],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

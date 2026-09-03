@@ -33,6 +33,9 @@ export const styles = StyleSheet.create({
   favoriteAction: {
     backgroundColor: '#1E88E5',
   },
+  unfavoriteAction: {
+    backgroundColor: '#6B7280',
+  },
   orderAction: {
     backgroundColor: '#168A4A',
   },
@@ -59,7 +62,13 @@ export const styles = StyleSheet.create({
   texts: {
     flex: 1,
   },
+  titleRow: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 6,
+  },
   title: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '600',
   },

@@ -7,6 +7,7 @@ import { Animated, PanResponder, Pressable, Text, View } from 'react-native';
 
 /** External Libraries Imports */
 import { Image } from 'expo-image';
+import { Ionicons } from '@expo/vector-icons';
 
 /** Hooks Imports */
 import { useAppTheme } from '@/src/hooks';
@@ -22,6 +23,7 @@ const ListItem:FC<ListItemProps> = ({
   isIgnored,
   onPress,
   onFavorite,
+  onUnfavorite,
   onOrder,
   onIgnore,
   onUnignore,
@@ -57,16 +59,16 @@ const ListItem:FC<ListItemProps> = ({
   return (
     <View style={[styles.row, { borderBottomColor: colors.border, borderBottomWidth: 1 }]}>
       {!isIgnored && <View style={styles.actions}>
-        {onFavorite && (
+        {(isFavorite ? onUnfavorite : onFavorite) && (
           <Pressable
-            accessibilityLabel={`Add ${product.title} to favorites`}
+            accessibilityLabel={`${isFavorite ? 'Remove' : 'Add'} ${product.title} ${isFavorite ? 'from' : 'to'} favorites`}
             accessibilityRole="button"
             onPress={() => {
-              onFavorite();
+              (isFavorite ? onUnfavorite : onFavorite)?.();
               closeActions();
             }}
-            style={[styles.action, styles.favoriteAction]}>
-            <Text style={styles.actionLabel}>Favorite</Text>
+            style={[styles.action, isFavorite ? styles.unfavoriteAction : styles.favoriteAction]}>
+            <Text style={styles.actionLabel}>{isFavorite ? 'Unfavorite' : 'Favorite'}</Text>
           </Pressable>
         )}
         {onOrder && (
@@ -107,11 +109,21 @@ const ListItem:FC<ListItemProps> = ({
           style={styles.container}>
           <Image source={{ uri: product.thumbnail }} style={styles.image} contentFit="cover" />
           <View style={styles.texts}>
-            <Text
-              numberOfLines={1}
-              style={[styles.title, { color: isIgnored ? colors.textMuted : colors.text }]}>
-              {product.title}
-            </Text>
+            <View style={styles.titleRow}>
+              <Text
+                numberOfLines={1}
+                style={[styles.title, { color: isIgnored ? colors.textMuted : colors.text }]}>
+                {product.title}
+              </Text>
+              {isFavorite && (
+                <Ionicons
+                  name="heart"
+                  size={16}
+                  color={colors.primary}
+                  accessibilityLabel="Favorite product"
+                />
+              )}
+            </View>
             <Text style={[styles.price, { color: isIgnored ? colors.textMuted : colors.primary }]}>
               {product.price.toFixed(2)} €
             </Text>

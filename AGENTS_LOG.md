@@ -108,3 +108,71 @@
   plus les actions de swipe. Ils proposent désormais uniquement une action
   visible `Unignore` pour retirer leur statut ignoré.
 - **Commentaire Git suggéré :** `feat: replace ignored product swipe actions with unignore`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/SwipeCard/`, `src/screens/DiscoverScreen.tsx`
+- **Description :** Ajout du swipe horizontal de la carte produit avec seuil
+  `SWIPE_THRESHOLD` de 250, interpolation progressive du fond vers les couleurs
+  gauche/droite, déclenchement des actions de navigation ou favori au-delà du
+  seuil et retour élastique avec léger rebond lorsque le swipe est insuffisant.
+- **Commentaire Git suggéré :** `feat: add thresholded horizontal product card swipe`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/SwipeCard/SwipeCard.tsx`
+- **Description :** Remplacement de `react-native-reanimated` par l'API
+  `Animated` native de React Native pour le swipe de la carte produit, en
+  conservant l'interpolation des couleurs, le seuil de déclenchement et les
+  animations de sortie, de rebond et de retour élastique.
+- **Commentaire Git suggéré :** `refactor: use native animated API for swipe card`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/SwipeCard/SwipeCard.tsx`,
+  `src/components/SwipeCard/SwipeCard.stylesheet.tsx`
+- **Description :** Correction du rendu de l'image pendant le swipe en animant
+  directement le composant `Card` plutôt qu'une enveloppe `Animated.View`, afin
+  de conserver le conteneur d'image et sa mise en page intactes.
+- **Commentaire Git suggéré :** `fix: preserve swipe card image rendering`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/SwipeCard/SwipeCard.tsx`
+- **Description :** Correction du déclenchement des actions de swipe :
+  l'action gauche ou droite est maintenant appelée immédiatement après le
+  franchissement du seuil, avant l'animation de sortie, tandis qu'un swipe
+  insuffisant conserve le retour élastique.
+- **Commentaire Git suggéré :** `fix: trigger swipe actions before card exit animation`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/ListItem/`
+- **Description :** Ajout d'une icône cœur visible à côté du nom des produits
+  favoris dans la liste `Products`.
+- **Commentaire Git suggéré :** `feat: show favorite icon in product list`
+
+## 2026-09-03
+
+- **Fichiers :** `src/store/AppStateContext.tsx`, `src/components/ListItem/`,
+  `src/screens/ProductsScreen.tsx`
+- **Description :** Ajout de l'action de swipe `Unfavorite` pour les produits
+  déjà favoris dans `Products`, avec retrait du produit depuis l'état partagé
+  et remplacement conditionnel de l'action `Favorite`.
+- **Commentaire Git suggéré :** `feat: allow unfavoriting products from list`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/SwipeCard/SwipeCard.tsx`,
+  `src/components/SwipeCard/SwipeCard.stylesheet.tsx`
+- **Description :** Conservation de l'enveloppe animée nécessaire au swipe,
+  avec une hauteur minimale, une largeur explicite et un conteneur masquant les
+  débordements pour stabiliser le rendu de l'image et du contenu de la carte.
+- **Commentaire Git suggéré :** `fix: stabilize swipe card image container`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/SwipeCard/SwipeCard.stylesheet.tsx`
+- **Description :** Ajout d'une bordure gris clair et d'une ombre portée au
+  conteneur de `SwipeCard` pour correspondre au rendu graphique de la maquette.
+- **Commentaire Git suggéré :** `style: add border and shadow to swipe card`

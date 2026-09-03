@@ -10,6 +10,7 @@ export type ListItemProps = {
   isIgnored?: boolean;
   onPress?: () => void;
   onFavorite?: () => void;
+  onUnfavorite?: () => void;
   onOrder?: () => void;
   onIgnore?: () => void;
   onUnignore?: () => void;
