@@ -13,4 +13,6 @@ export type LongPressButtonProps = Types.WithTextContent & Partial<Types.WithSiz
     validatedColor?: string;
     accessibilityLabel?: string;
     icon?: ComponentProps<typeof Ionicons>['name'];
+    appearance?: 'circular' | 'regular';
+    disabled?: boolean;
 };

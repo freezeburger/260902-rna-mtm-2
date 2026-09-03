@@ -33,6 +33,8 @@ const LongPressButton:FC<LongPressButtonProps> = ({
   action,
   validatedColor,
   accessibilityLabel,
+  appearance = 'circular',
+  disabled = false,
 }) => {
   const { colors } = useAppTheme();
   const activeColor = validatedColor ?? colors.danger;
@@ -70,13 +72,26 @@ const LongPressButton:FC<LongPressButtonProps> = ({
         accessibilityRole="button"
         accessibilityLabel={accessibilityLabel ?? content}
         accessibilityHint="Press and hold to confirm"
+        disabled={disabled}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         onLongPress={handleLongPress}
         delayLongPress={VALIDATION_DURATION}
       >
-        <Animated.View style={[styles.container, styles[size], { borderColor: colors.border }, animatedStyle]}>
-          <Ionicons name={icon} size={28} color={colors.text} />
+        <Animated.View
+          style={[
+            styles.container,
+            appearance === 'circular' ? styles.circular : styles.regular,
+            styles[size],
+            { borderColor: colors.border },
+            disabled && { opacity: 0.45 },
+            animatedStyle,
+          ]}>
+          {appearance === 'circular' ? (
+            <Ionicons name={icon} size={28} color={colors.text} />
+          ) : (
+            <Text style={{ color: colors.text, fontWeight: '600' }}>{content}</Text>
+          )}
         </Animated.View>
       </Pressable>
       <Text style={[styles.label, { color: colors.text }]}>{content}</Text>
@@ -96,7 +111,10 @@ const LongPressButtonMemoized = React.memo(LongPressButton, (prevProps, nextProp
       prevProps.size === nextProps.size &&
       prevProps.action === nextProps.action &&
       prevProps.validatedColor === nextProps.validatedColor &&
-      prevProps.accessibilityLabel === nextProps.accessibilityLabel
+      prevProps.accessibilityLabel === nextProps.accessibilityLabel &&
+      prevProps.appearance === nextProps.appearance &&
+      prevProps.icon === nextProps.icon &&
+      prevProps.disabled === nextProps.disabled
     );
 });
 LongPressButtonMemoized.displayName = 'LongPressButtonMemoized';

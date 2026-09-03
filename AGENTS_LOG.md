@@ -74,3 +74,12 @@
   cœur, libellés sous les boutons et conservation de la validation par appui
   long pour ignorer.
 - **Commentaire Git suggéré :** `feat: align discover actions with product swipe design`
+
+## 2026-09-03
+
+- **Fichiers :** `src/components/LongPressButton/`,
+  `src/screens/OrdersScreen.tsx`, `src/screens/SettingsScreen.tsx`
+- **Description :** Ajout d'une variante rectangulaire réutilisable du bouton
+  d'appui long pour sécuriser `Place order` et `Save changes`, tandis que
+  l'action circulaire reste utilisée sur `Discover`.
+- **Commentaire Git suggéré :** `feat: require long press for order and settings confirmation`

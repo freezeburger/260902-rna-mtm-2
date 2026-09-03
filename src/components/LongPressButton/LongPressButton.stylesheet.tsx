@@ -8,19 +8,22 @@ export const styles = StyleSheet.create({
   },
   container: {
     alignItems: 'center',
-    borderRadius: 32,
     borderWidth: 1,
     justifyContent: 'center',
+  },
+  circular: {
+    borderRadius: 32,
     height: 64,
     width: 64,
   },
   regular: {
+    borderRadius: 8,
     minHeight: 48,
     paddingHorizontal: 24,
   },
   small: {
-    minHeight: 64,
-    paddingHorizontal: 0,
+    minHeight: 36,
+    paddingHorizontal: 16,
   },
   label: {
     fontSize: 12,

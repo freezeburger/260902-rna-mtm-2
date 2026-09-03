@@ -12,11 +12,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppState, useAppTheme } from '@/src/hooks';
 
 /** Local Imports */
-import Button from '@/src/components/Button';
 import ContentCard from '@/src/components/ContentCard';
 import Fieldset from '@/src/components/Fieldset';
 import Header from '@/src/components/Header';
 import Input from '@/src/components/Input';
+import LongPressButton from '@/src/components/LongPressButton';
 import NumericInput from '@/src/components/NumericInput';
 import Switch from '@/src/components/Switch';
 
@@ -58,7 +58,14 @@ const SettingsScreen:FC = () => {
               accessibilityLabel="default order quantity"
             />
           </Fieldset>
-          <Button content="Save changes" onPress={handleSave} disabled={!hasChanges} />
+          <LongPressButton
+            content="Save changes"
+            action={handleSave}
+            appearance="regular"
+            disabled={!hasChanges}
+            accessibilityLabel="Save changes, press and hold to confirm"
+            validatedColor={colors.primary}
+          />
         </ContentCard>
 
         <ContentCard title="Preferences" style={styles.card}>

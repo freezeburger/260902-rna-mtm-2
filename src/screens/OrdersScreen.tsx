@@ -13,10 +13,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppTheme, useOrderSummary } from '@/src/hooks';
 
 /** Local Imports */
-import Button from '@/src/components/Button';
 import ContentCard from '@/src/components/ContentCard';
 import EmptyState from '@/src/components/EmptyState';
 import Header from '@/src/components/Header';
+import LongPressButton from '@/src/components/LongPressButton';
 import NumericInput from '@/src/components/NumericInput';
 
 const OrdersScreen:FC = () => {
@@ -55,7 +55,14 @@ const OrdersScreen:FC = () => {
               <Text style={[styles.total, { color: colors.primary }]}>{total.toFixed(2)} €</Text>
             </View>
             <View style={styles.action}>
-              <Button content="Place order" onPress={handlePlaceOrder} disabled={!canPlaceOrder} />
+              <LongPressButton
+                content="Place order"
+                action={handlePlaceOrder}
+                appearance="regular"
+                disabled={!canPlaceOrder}
+                accessibilityLabel="Place order, press and hold to confirm"
+                validatedColor={colors.success}
+              />
             </View>
           </ContentCard>
         )}
