@@ -24,6 +24,7 @@ const ListItem:FC<ListItemProps> = ({
   onFavorite,
   onOrder,
   onIgnore,
+  onUnignore,
   right,
 }) => {
   const { colors } = useAppTheme();
@@ -53,7 +54,7 @@ const ListItem:FC<ListItemProps> = ({
 
   return (
     <View style={[styles.row, { borderBottomColor: colors.border, borderBottomWidth: 1 }]}>
-      <View style={styles.actions}>
+      {!isIgnored && <View style={styles.actions}>
         {onFavorite && (
           <Pressable
             accessibilityLabel={`Add ${product.title} to favorites`}
@@ -90,9 +91,9 @@ const ListItem:FC<ListItemProps> = ({
             <Text style={styles.actionLabel}>Ignore</Text>
           </Pressable>
         )}
-      </View>
+      </View>}
       <Animated.View
-        {...panResponder.panHandlers}
+        {...(isIgnored ? {} : panResponder.panHandlers)}
         style={[
           styles.foreground,
           { backgroundColor: colors.background, borderBottomColor: colors.border, transform: [{ translateX }] },
@@ -117,7 +118,15 @@ const ListItem:FC<ListItemProps> = ({
               {isIgnored && <Badge label="Ignored" variant="ignored" />}
             </View>
           </View>
-          {right}
+          {isIgnored && onUnignore ? (
+            <Pressable
+              accessibilityLabel={`Unignore ${product.title}`}
+              accessibilityRole="button"
+              onPress={onUnignore}
+              style={[styles.action, styles.unignoreAction]}>
+              <Text style={styles.actionLabel}>Unignore</Text>
+            </Pressable>
+          ) : right}
         </Pressable>
       </Animated.View>
     </View>

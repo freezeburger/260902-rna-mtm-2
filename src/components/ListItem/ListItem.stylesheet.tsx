@@ -39,6 +39,11 @@ export const styles = StyleSheet.create({
   ignoreAction: {
     backgroundColor: '#D14343',
   },
+  unignoreAction: {
+    backgroundColor: '#6B7280',
+    borderRadius: 6,
+    paddingVertical: 8,
+  },
   foreground: {
     backgroundColor: '#FFFFFF',
   },

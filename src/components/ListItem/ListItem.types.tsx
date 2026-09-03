@@ -12,5 +12,6 @@ export type ListItemProps = {
   onFavorite?: () => void;
   onOrder?: () => void;
   onIgnore?: () => void;
+  onUnignore?: () => void;
   right?: ReactNode;
 };

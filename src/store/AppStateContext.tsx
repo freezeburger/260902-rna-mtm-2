@@ -33,6 +33,7 @@ type Action =
   | { type: 'DISCOVER_RESTART' }
   | { type: 'ADD_FAVORITE'; productId: string }
   | { type: 'IGNORE_PRODUCT'; productId: string }
+  | { type: 'UNIGNORE_PRODUCT'; productId: string }
   | { type: 'SELECT_PRODUCT_FOR_ORDER'; productId: string }
   | { type: 'SET_ORDER_QUANTITY'; quantity: number }
   | { type: 'PLACE_ORDER' }
@@ -68,6 +69,12 @@ function reducer(state: AppState, action: Action): AppState {
           ? state.ignoredProductIds
           : [...state.ignoredProductIds, action.productId],
         discoverIndex: state.discoverIndex + 1,
+      };
+
+    case 'UNIGNORE_PRODUCT':
+      return {
+        ...state,
+        ignoredProductIds: state.ignoredProductIds.filter((productId) => productId !== action.productId),
       };
 
     case 'SELECT_PRODUCT_FOR_ORDER':
@@ -118,6 +125,7 @@ export type AppStateContextValue = {
   discoverRestart: () => void;
   addFavorite: (productId: string) => void;
   ignoreProduct: (productId: string) => void;
+  unignoreProduct: (productId: string) => void;
   selectProductForOrder: (productId: string) => void;
   setOrderQuantity: (quantity: number) => void;
   placeOrder: () => void;
@@ -134,6 +142,7 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
   const discoverRestart = useCallback(() => dispatch({ type: 'DISCOVER_RESTART' }), []);
   const addFavorite = useCallback((productId: string) => dispatch({ type: 'ADD_FAVORITE', productId }), []);
   const ignoreProduct = useCallback((productId: string) => dispatch({ type: 'IGNORE_PRODUCT', productId }), []);
+  const unignoreProduct = useCallback((productId: string) => dispatch({ type: 'UNIGNORE_PRODUCT', productId }), []);
   const selectProductForOrder = useCallback(
     (productId: string) => dispatch({ type: 'SELECT_PRODUCT_FOR_ORDER', productId }),
     [],
@@ -154,12 +163,13 @@ export const AppStateProvider: FC<PropsWithChildren> = ({ children }) => {
       discoverRestart,
       addFavorite,
       ignoreProduct,
+      unignoreProduct,
       selectProductForOrder,
       setOrderQuantity,
       placeOrder,
       updateSettings,
     }),
-    [state, setUsername, discoverNext, discoverRestart, addFavorite, ignoreProduct, selectProductForOrder, setOrderQuantity, placeOrder, updateSettings],
+    [state, setUsername, discoverNext, discoverRestart, addFavorite, ignoreProduct, unignoreProduct, selectProductForOrder, setOrderQuantity, placeOrder, updateSettings],
   );
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

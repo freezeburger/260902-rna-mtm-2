@@ -99,3 +99,12 @@
   commande, avec présentation en ligne de l'image, du nom et du prix comme dans
   la maquette.
 - **Commentaire Git suggéré :** `feat: show selected product image in orders`
+
+## 2026-09-03
+
+- **Fichiers :** `src/store/AppStateContext.tsx`, `src/components/ListItem/`,
+  `src/screens/ProductsScreen.tsx`
+- **Description :** Les produits ignorés ne sont plus glissables et n'affichent
+  plus les actions de swipe. Ils proposent désormais uniquement une action
+  visible `Unignore` pour retirer leur statut ignoré.
+- **Commentaire Git suggéré :** `feat: replace ignored product swipe actions with unignore`

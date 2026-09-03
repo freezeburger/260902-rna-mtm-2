@@ -21,7 +21,7 @@ import { selectIsFavorite, selectIsIgnored } from '@/src/store/selectors';
 
 const ProductsScreen:FC = () => {
   const { colors } = useAppTheme();
-  const { state, addFavorite, ignoreProduct, selectProductForOrder } = useAppState();
+  const { state, addFavorite, ignoreProduct, unignoreProduct, selectProductForOrder } = useAppState();
   const router = useRouter();
   const [query, setQuery] = useState('');
 
@@ -59,6 +59,7 @@ const ProductsScreen:FC = () => {
               isIgnored={selectIsIgnored(state, item.id)}
               onFavorite={() => addFavorite(item.id)}
               onIgnore={() => ignoreProduct(item.id)}
+              onUnignore={() => unignoreProduct(item.id)}
               onOrder={() => {
                 selectProductForOrder(item.id);
                 router.push('/(tabs)/orders');
