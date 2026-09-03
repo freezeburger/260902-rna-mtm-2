@@ -53,7 +53,7 @@ const LongPressButton:FC<LongPressButtonProps> = ({
   const handlePressIn = () => {
     progress.value = withTiming(1, {
       duration: VALIDATION_DURATION,
-      easing: Easing.linear,
+      easing: Easing.ease,
     });
   };
 

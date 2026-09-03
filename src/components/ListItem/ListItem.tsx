@@ -28,7 +28,9 @@ const ListItem:FC<ListItemProps> = ({
   right,
 }) => {
   const { colors } = useAppTheme();
+
   const translateX = useRef(new Animated.Value(0)).current;
+
   const closeActions = () => {
     Animated.spring(translateX, { toValue: 0, useNativeDriver: true }).start();
   };
