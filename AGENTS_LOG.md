@@ -64,3 +64,13 @@
   gauche dans la liste des produits, avec les actions `Favorite`, `Order` et
   `Ignore` reliées à l'état partagé et au parcours de commande.
 - **Commentaire Git suggéré :** `feat: add swipe actions to product list`
+
+## 2026-09-03
+
+- **Fichiers :** `src/screens/DiscoverScreen.tsx`, `src/components/ActionButton/`,
+  `src/components/LongPressButton/`
+- **Description :** Alignement des actions de découverte sur la maquette :
+  boutons circulaires rouge, gris et bleu avec icônes flèche, fermeture et
+  cœur, libellés sous les boutons et conservation de la validation par appui
+  long pour ignorer.
+- **Commentaire Git suggéré :** `feat: align discover actions with product swipe design`

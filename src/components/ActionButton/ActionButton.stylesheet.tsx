@@ -3,6 +3,10 @@
 import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
+  wrapper: {
+    alignItems: 'center',
+    gap: 6,
+  },
   container: {
     alignItems: 'center',
     borderRadius: 32,
@@ -16,6 +20,10 @@ export const styles = StyleSheet.create({
     elevation: 2,
     width: 64,
   },
+    label: {
+      fontSize: 12,
+      fontWeight: '600',
+    },
   pressed: {
     opacity: 0.75,
   },

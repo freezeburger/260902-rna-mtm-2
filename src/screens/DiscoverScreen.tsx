@@ -41,14 +41,26 @@ const DiscoverScreen:FC = () => {
           <>
             <SwipeCard product={currentProduct} />
             <View style={styles.actions}>
-              <ActionButton icon="arrow-back" accessibilityLabel="Next product" onPress={next} />
+              <ActionButton
+                icon="arrow-back"
+                label="Left / Next"
+                accessibilityLabel="Next product"
+                onPress={next}
+                variant="danger"
+              />
               <LongPressButton
                 content="Ignore"
                 size="small"
                 action={ignore}
                 accessibilityLabel="Ignore product, press and hold to confirm"
               />
-              <ActionButton icon="heart" accessibilityLabel="Add to favorites" onPress={favorite} variant="primary" />
+              <ActionButton
+                icon="heart"
+                label="Right / Favorite"
+                accessibilityLabel="Add to favorites"
+                onPress={favorite}
+                variant="primary"
+              />
             </View>
           </>
         )}

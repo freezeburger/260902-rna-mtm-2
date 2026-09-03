@@ -3,7 +3,7 @@
 import React, { type FC } from 'react';
 
 /** React Native Imports */
-import { Pressable, Text } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 /** External Libraries Imports */
 import Animated, {
@@ -14,6 +14,7 @@ import Animated, {
   interpolateColor,
   Easing,
 } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 
 /** Hooks Imports */
 import { useAppTheme } from '@/src/hooks';
@@ -25,7 +26,14 @@ import type { LongPressButtonProps } from './LongPressButton.types';
 /** Duration (in ms) required to hold the button before the action is validated. */
 const VALIDATION_DURATION = 2000;
 
-const LongPressButton:FC<LongPressButtonProps> = ({ content, size = 'regular', action, validatedColor, accessibilityLabel }) => {
+const LongPressButton:FC<LongPressButtonProps> = ({
+  content,
+  icon = 'close',
+  size = 'regular',
+  action,
+  validatedColor,
+  accessibilityLabel,
+}) => {
   const { colors } = useAppTheme();
   const activeColor = validatedColor ?? colors.danger;
 
@@ -57,19 +65,22 @@ const LongPressButton:FC<LongPressButtonProps> = ({ content, size = 'regular', a
   };
 
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel ?? content}
-      accessibilityHint="Press and hold to confirm"
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      onLongPress={handleLongPress}
-      delayLongPress={VALIDATION_DURATION}
-    >
-      <Animated.View style={[styles.container, styles[size], { borderColor: colors.border }, animatedStyle]}>
-        <Text style={{ color: colors.text, fontWeight: '600' }}>{content}</Text>
-      </Animated.View>
-    </Pressable>
+    <View style={styles.wrapper}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? content}
+        accessibilityHint="Press and hold to confirm"
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        onLongPress={handleLongPress}
+        delayLongPress={VALIDATION_DURATION}
+      >
+        <Animated.View style={[styles.container, styles[size], { borderColor: colors.border }, animatedStyle]}>
+          <Ionicons name={icon} size={28} color={colors.text} />
+        </Animated.View>
+      </Pressable>
+      <Text style={[styles.label, { color: colors.text }]}>{content}</Text>
+    </View>
   );
 };
 
