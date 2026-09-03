@@ -1,1352 +1,1940 @@
-# React Native + Expo SDK — Bonnes pratiques concrètes
+# Redux Toolkit dans React Native
 
-## Objectif
-
-Ce document complète la présentation générale de React Native et Expo SDK avec une approche volontairement pratique :
-
-> **Pratique → Pourquoi → Mauvais exemple → Bonne approche**
-
-L'objectif n'est pas d'imposer des règles absolues, mais de fournir des **réflexes de développement** adaptés à une application mobile React Native moderne.
+## Comprendre le modèle, utiliser les slices et maîtriser la complexité
 
 ---
 
-# 1. Utiliser le bon composant pour une liste
+# Objectif pédagogique
 
-## Pratique
+Redux Toolkit est aujourd'hui la manière officiellement recommandée d'utiliser Redux. Il fournit notamment `configureStore`, `createSlice`, Redux Thunk, Immer et plusieurs outils de contrôle destinés à réduire le code historiquement associé à Redux.
 
-Utiliser :
+Mais une difficulté demeure :
 
-* `ScrollView` pour une petite quantité de contenu ;
-* `FlatList` pour une collection potentiellement importante ;
-* `SectionList` lorsque les données sont regroupées par sections.
+> **Redux Toolkit réduit la verbosité technique de Redux, sans supprimer son modèle architectural.**
 
-## Pourquoi ?
+Avant d'utiliser les outils, il est donc préférable de comprendre **pourquoi une donnée devrait entrer dans Redux**.
 
-`ScrollView` rend généralement tous ses enfants.
-
-Pour une longue liste, cela peut entraîner :
-
-* consommation mémoire ;
-* temps de rendu initial élevé ;
-* ralentissements ;
-* mauvaise fluidité.
-
-`FlatList` fournit au contraire une stratégie de rendu virtualisé adaptée aux collections. React Native recommande également `getItemLayout` lorsque la taille des éléments est prévisible afin d'éviter certaines mesures au runtime.
-
-### À éviter
-
-```tsx
-<ScrollView>
-  {products.map(product => (
-    <ProductCard
-      key={product.id}
-      product={product}
-    />
-  ))}
-</ScrollView>
-```
-
-pour plusieurs centaines de produits.
-
-### Préférer
-
-```tsx
-<FlatList
-  data={products}
-  keyExtractor={product => product.id}
-  renderItem={({ item }) => (
-    <ProductCard product={item} />
-  )}
-/>
-```
-
-### À retenir
-
-> **Collection importante = penser virtualisation.**
-
----
-
-# 2. Ne pas mettre toute la logique dans les écrans
-
-## Pratique
-
-Un écran doit principalement :
-
-1. orchestrer ;
-2. récupérer les données nécessaires ;
-3. composer les composants ;
-4. gérer les interactions propres à l'écran.
-
-Il ne devrait pas concentrer toute l'application.
-
-### À éviter
-
-```tsx
-function ProductsScreen() {
-  // fetch
-  // mapping
-  // tri
-  // filtre
-  // validation
-  // navigation
-  // stockage
-  // analytics
-  // 250 lignes de JSX...
-}
-```
-
-### Préférer
+Ce document suit trois temps :
 
 ```text
-ProductsScreen
-│
-├── useProducts()
-├── ProductFilters
-├── ProductList
-│   └── ProductCard
-│
-└── EmptyProducts
+1. Comprendre
+      ↓
+   modèle mental
+
+2. Construire
+      ↓
+   slices + middleware
+
+3. Questionner
+      ↓
+   pièges + verbosité
 ```
-
-Exemple :
-
-```tsx
-function ProductsScreen() {
-  const {
-    products,
-    loading,
-    filter,
-    setFilter,
-  } = useProducts();
-
-  return (
-    <>
-      <ProductFilters
-        value={filter}
-        onChange={setFilter}
-      />
-
-      <ProductList
-        products={products}
-        loading={loading}
-      />
-    </>
-  );
-}
-```
-
-### À retenir
-
-> **L'écran compose ; les composants affichent ; les hooks orchestrent la logique réutilisable.**
 
 ---
 
-# 3. Garder l'état au plus près de son utilisation
+# 1 — Modèle mental simplifié
 
-## Pratique
+## 1.1 Le problème que Redux cherche à résoudre
 
-Ne pas transformer automatiquement chaque donnée en état global.
-
-Avant de créer un store, demander :
-
-> Qui a réellement besoin de cette information ?
-
-## Exemple
-
-L'ouverture d'une modal :
+Dans React Native, un état local est parfaitement adapté lorsque l'information appartient à un composant.
 
 ```tsx
 const [visible, setVisible] = useState(false);
 ```
 
-appartient probablement au composant concerné.
+Par exemple :
 
-Le panier partagé entre plusieurs écrans :
+```text
+Modal ouverte ?
+Champ sélectionné ?
+Onglet temporaire ?
+Animation active ?
+```
+
+Mais certaines informations doivent être partagées entre plusieurs parties de l'application.
+
+Exemple :
 
 ```text
 Discover
+    │
+    │ favorite
+    ▼
 Favorites
+    │
+    │ order
+    ▼
 Order
 ```
 
-peut, lui, justifier un état partagé.
-
-## Une hiérarchie utile
+Les trois écrans peuvent avoir besoin de connaître :
 
 ```text
-État composant
-      ↓
-État écran
-      ↓
-Context / feature
-      ↓
-Store global
+produits favoris
+commande courante
+profil utilisateur
+préférences globales
 ```
 
-On descend seulement lorsque cela devient nécessaire.
-
-### À éviter
+Sans état partagé, on risque progressivement :
 
 ```text
-Redux / Zustand / autre store
-        ↑
-      absolument tout
+props
+ ↓
+props
+ ↓
+props
+ ↓
+props
 ```
 
-### À retenir
+ou plusieurs copies différentes de la même information.
 
-> **Globaliser tard plutôt que globaliser par défaut.**
+Redux propose alors :
+
+> **un emplacement central pour l'état réellement global de l'application.**
+
+La documentation Redux insiste d'ailleurs sur un point souvent mal compris : tout l'état d'une application ne doit pas nécessairement être placé dans Redux. Les données locales doivent généralement rester près des composants qui les utilisent.
 
 ---
 
-# 4. Ne pas utiliser `useEffect` comme couteau suisse
+# 1.2 Le Store
 
-## Pratique
+Le cœur de Redux est le :
 
-`useEffect` sert principalement à synchroniser React avec un système extérieur.
+```text
+STORE
+```
+
+On peut le voir comme :
+
+```text
+┌─────────────────────────────┐
+│            STORE            │
+│                             │
+│ user                        │
+│ favorites                   │
+│ order                       │
+│ settings                    │
+└─────────────────────────────┘
+```
+
+Il contient l'état global Redux.
+
+Dans une application standard, Redux recommande un seul store.
+
+Avec Redux Toolkit :
+
+```ts
+import { configureStore } from '@reduxjs/toolkit';
+
+export const store = configureStore({
+  reducer: {}
+});
+```
+
+`configureStore` configure notamment le store, les reducers, Redux Thunk et différents contrôles de développement.
+
+---
+
+# 1.3 React Native accède au Store par le Provider
+
+Dans React, le store est fourni à l'arbre de composants :
+
+```tsx
+<Provider store={store}>
+  <App />
+</Provider>
+```
+
+Dans une application Expo Router, ce Provider peut par exemple se trouver au niveau du layout racine :
+
+```tsx
+export default function RootLayout() {
+  return (
+    <Provider store={store}>
+      <Stack />
+    </Provider>
+  );
+}
+```
+
+On obtient conceptuellement :
+
+```text
+Provider
+   │
+   ▼
+Application
+   │
+   ├── Discover
+   ├── Favorites
+   ├── Order
+   └── Settings
+
+Tous peuvent accéder
+au même store Redux.
+```
+
+---
+
+# 1.4 Redux fonctionne avec des événements
+
+Un composant ne devrait pas dire directement :
+
+```text
+store.favorites = [...]
+```
+
+Il annonce plutôt :
+
+> **« quelque chose s'est produit ».**
+
+Cette information est représentée par une :
+
+```text
+ACTION
+```
+
+Par exemple :
+
+```ts
+{
+  type: "favorites/productAdded",
+  payload: product
+}
+```
+
+Le nom raconte l'événement :
+
+```text
+favorites / productAdded
+     │           │
+     │           └── ce qui s'est produit
+     │
+     └── domaine concerné
+```
+
+---
+
+# 1.5 Dispatch
+
+Pour envoyer l'action au store :
+
+```text
+DISPATCH
+```
+
+Exemple conceptuel :
+
+```tsx
+dispatch(
+  productAdded(product)
+);
+```
+
+Le composant ne modifie pas le store.
+
+Il dit :
+
+```text
+« Product 42 vient d'être ajouté
+aux favoris »
+```
+
+---
+
+# 1.6 Reducer
+
+Le reducer détermine comment l'état doit évoluer en réponse à une action.
+
+```text
+état actuel
+    +
+  action
+    ↓
+ reducer
+    ↓
+nouvel état
+```
+
+Par exemple :
+
+```ts
+productAdded(state, action) {
+  state.items.push(action.payload);
+}
+```
+
+Cette écriture semble modifier directement `state`.
+
+Mais `createSlice` utilise **Immer**, qui transforme cette syntaxe en mise à jour immutable. Redux recommande cette approche pour simplifier les mises à jour immutables.
+
+Il faut donc comprendre :
+
+```text
+syntaxe mutative
+      ≠
+mutation réelle du store
+```
+
+---
+
+# 1.7 Selector
+
+Pour récupérer une information :
+
+```text
+SELECTOR
+```
+
+Par exemple :
+
+```tsx
+const favorites = useSelector(
+  state => state.favorites.items
+);
+```
+
+Le selector répond à la question :
+
+> **Quelle partie de l'état m'intéresse ?**
+
+On peut donc distinguer clairement :
+
+```text
+dispatch
+   ↓
+écrire / signaler
+
+selector
+   ↓
+lire
+```
+
+---
+
+# 1.8 La boucle complète Redux
+
+Le modèle mental fondamental peut tenir dans cette boucle :
+
+```text
+        UTILISATEUR
+             │
+             ▼
+        COMPOSANT
+             │
+          dispatch
+             │
+             ▼
+           ACTION
+             │
+             ▼
+        MIDDLEWARE
+             │
+             ▼
+          REDUCER
+             │
+             ▼
+           STORE
+             │
+          selector
+             │
+             ▼
+        COMPOSANT
+             │
+             ▼
+        UTILISATEUR
+```
+
+Exemple :
+
+```text
+♥ Press
+   │
+   ▼
+dispatch(productAdded(product))
+   │
+   ▼
+favorites/productAdded
+   │
+   ▼
+favoritesReducer
+   │
+   ▼
+store.favorites
+   │
+   ▼
+useSelector(...)
+   │
+   ▼
+FavoritesScreen se met à jour
+```
+
+---
+
+# 1.9 Redux est un flux unidirectionnel
+
+C'est probablement le principe le plus important.
+
+```text
+UI
+ ↓
+Action
+ ↓
+Reducer
+ ↓
+State
+ ↓
+UI
+```
+
+On évite :
+
+```text
+UI
+ ↕
+Service
+ ↕
+Store
+ ↕
+Autre composant
+ ↕
+Objet global
+```
+
+Le flux est prévisible parce qu'il possède une direction.
+
+---
+
+# 1.10 Le modèle mental minimal
+
+Avant d'apprendre l'API Redux Toolkit, quatre mots suffisent :
+
+| Concept  | Question                      |
+| -------- | ----------------------------- |
+| Store    | Où se trouve l'état partagé ? |
+| Action   | Que vient-il de se produire ? |
+| Reducer  | Comment l'état évolue-t-il ?  |
+| Selector | Quelle donnée veux-je lire ?  |
+
+On peut ajouter ensuite :
+
+| Concept    | Fonction                           |
+| ---------- | ---------------------------------- |
+| Dispatch   | envoyer une action                 |
+| Middleware | intervenir entre action et reducer |
+
+---
+
+# 2 — Slices et Middleware
+
+# 2.1 Pourquoi les slices ?
+
+Historiquement, Redux pouvait demander de définir séparément :
+
+```text
+action type
++
+action creator
++
+reducer
++
+switch
++
+state initial
+```
+
+Redux Toolkit rassemble ces éléments dans :
+
+```text
+createSlice()
+```
+
+Une slice représente une **partie fonctionnelle du store**.
 
 Par exemple :
 
 ```text
-React
-  ↕
-API externe
-subscription
-timer
-événement natif
+STORE
+│
+├── user
+├── favorites   ← slice
+├── order       ← slice
+└── settings    ← slice
 ```
 
-Il ne doit pas devenir l'endroit où toute logique applicative est exécutée.
+Une slice n'est donc pas :
 
-### À éviter
+> un deuxième store.
 
-```tsx
-useEffect(() => {
-  const filtered = products.filter(...);
-  setFilteredProducts(filtered);
-}, [products, filter]);
-```
+C'est :
 
-Ici, `filteredProducts` peut être calculé directement.
+> **une portion du store et la logique Redux qui lui appartient.**
 
-### Préférer
-
-```tsx
-const filteredProducts = products.filter(product =>
-  product.name.includes(filter)
-);
-```
-
-ou éventuellement :
-
-```tsx
-const filteredProducts = useMemo(
-  () =>
-    products.filter(product =>
-      product.name.includes(filter)
-    ),
-  [products, filter]
-);
-```
-
-si le calcul est suffisamment coûteux pour le justifier.
-
-### À retenir
-
-> **Si une valeur peut être calculée pendant le rendu, elle n'a généralement pas besoin d'un `useEffect`.**
+`createSlice` génère automatiquement les action creators et leurs types à partir des reducers déclarés.
 
 ---
 
-# 5. Ne pas mémoriser tout systématiquement
+# 2.2 Exemple : Favorites Slice
 
-`useMemo`, `useCallback` et `memo` sont des outils d'optimisation.
+```ts
+import {
+  createSlice,
+  PayloadAction
+} from '@reduxjs/toolkit';
 
-Ils ne doivent pas devenir du bruit syntaxique.
+type Product = {
+  id: number;
+  name: string;
+};
 
-### À éviter
+type FavoritesState = {
+  items: Product[];
+};
 
-```tsx
-const title = useMemo(
-  () => product.name,
-  [product.name]
-);
+const initialState: FavoritesState = {
+  items: []
+};
+
+const favoritesSlice = createSlice({
+  name: 'favorites',
+
+  initialState,
+
+  reducers: {
+    productAdded(
+      state,
+      action: PayloadAction<Product>
+    ) {
+      state.items.push(action.payload);
+    },
+
+    productRemoved(
+      state,
+      action: PayloadAction<number>
+    ) {
+      state.items = state.items.filter(
+        product => product.id !== action.payload
+      );
+    }
+  }
+});
 ```
 
-### Préférer
+Redux Toolkit génère automatiquement :
 
-```tsx
-const title = product.name;
+```text
+favorites/productAdded
+favorites/productRemoved
 ```
 
-La mémorisation devient pertinente lorsque :
+ainsi que les fonctions :
 
-* un calcul est réellement coûteux ;
-* une référence stable est importante ;
-* un composant optimisé en dépend ;
-* une mesure de performance montre un problème.
-
-### À retenir
-
-> **Optimiser une cause mesurée, pas une inquiétude hypothétique.**
+```ts
+favoritesSlice.actions.productAdded
+favoritesSlice.actions.productRemoved
+```
 
 ---
 
-# 6. Séparer données serveur et état d'interface
+# 2.3 Exporter les actions et le reducer
 
-Une donnée provenant d'une API n'a pas exactement la même nature qu'un état UI.
+Une convention fréquente :
 
-```text
-Modal ouverte
-      ≠
-Liste des produits provenant du serveur
+```ts
+export const {
+  productAdded,
+  productRemoved
+} = favoritesSlice.actions;
+
+export default favoritesSlice.reducer;
 ```
 
-Les données serveur possèdent généralement des problématiques supplémentaires :
+On obtient deux usages différents :
 
 ```text
-chargement
-cache
-erreur
-refresh
-stale data
-retry
-synchronisation
+productAdded
+     ↓
+dispatch depuis l'application
+
+
+favoritesSlice.reducer
+     ↓
+configuration du store
 ```
 
-Une architecture simple peut commencer ainsi :
+---
+
+# 2.4 Ajouter la slice au store
+
+```ts
+import { configureStore } from '@reduxjs/toolkit';
+
+import favoritesReducer
+  from '../features/favorites/favoritesSlice';
+
+export const store = configureStore({
+  reducer: {
+    favorites: favoritesReducer
+  }
+});
+```
+
+Cela produit :
 
 ```text
-Screen
+store
+└── favorites
+    └── items
+```
+
+Avec plusieurs slices :
+
+```ts
+export const store = configureStore({
+  reducer: {
+    favorites: favoritesReducer,
+    order: orderReducer,
+    settings: settingsReducer
+  }
+});
+```
+
+`configureStore` combine automatiquement les reducers lorsqu'on lui fournit cet objet.
+
+---
+
+# 2.5 Utiliser une slice dans React Native
+
+## Lire
+
+```tsx
+const favorites = useSelector(
+  (state: RootState) =>
+    state.favorites.items
+);
+```
+
+## Écrire
+
+```tsx
+const dispatch = useDispatch();
+
+const handleFavorite = (
+  product: Product
+) => {
+  dispatch(productAdded(product));
+};
+```
+
+Le composant reste alors assez lisible :
+
+```tsx
+<Pressable
+  onPress={() => handleFavorite(product)}
+>
+  <Text>Favorite</Text>
+</Pressable>
+```
+
+---
+
+# 2.6 Typage du store
+
+Une configuration TypeScript standard peut dériver les types directement du store :
+
+```ts
+export type RootState =
+  ReturnType<typeof store.getState>;
+
+export type AppDispatch =
+  typeof store.dispatch;
+```
+
+Cela évite de maintenir manuellement une deuxième définition de l'état global.
+
+---
+
+# 2.7 Une slice représente un domaine, pas un écran
+
+Il peut être tentant de créer :
+
+```text
+discoverScreenSlice
+favoritesScreenSlice
+orderScreenSlice
+settingsScreenSlice
+```
+
+Mais les écrans et les domaines métier ne sont pas nécessairement identiques.
+
+On préférera souvent :
+
+```text
+products
+favorites
+orders
+user
+settings
+```
+
+car une même donnée peut être utilisée par plusieurs écrans.
+
+### Mauvaise question
+
+> Quelle slice dois-je créer pour cet écran ?
+
+### Meilleure question
+
+> Quel domaine d'état global suis-je en train de représenter ?
+
+---
+
+# 2.8 Le Middleware
+
+Le middleware se situe entre :
+
+```text
+dispatch(action)
+       │
+       ▼
+   MIDDLEWARE
+       │
+       ▼
+    reducer
+```
+
+Il peut :
+
+```text
+observer l'action
+modifier le traitement
+déclencher un effet
+envoyer une autre action
+interrompre certains traitements
+```
+
+Le reducer doit rester sans effet de bord. Redux recommande explicitement que les reducers restent purs.
+
+Ainsi :
+
+```text
+REDUCER
+  ↓
+modifier l'état Redux
+
+MIDDLEWARE
+  ↓
+gérer les effets autour des actions
+```
+
+---
+
+# 2.9 Les middleware sont déjà présents
+
+Avec :
+
+```ts
+configureStore({
+  reducer
+});
+```
+
+Redux Toolkit configure déjà plusieurs middleware.
+
+En développement, les valeurs par défaut actuelles comprennent notamment :
+
+```text
+actionCreatorInvariant
+immutableStateInvariant
+thunk
+serializableStateInvariant
+```
+
+En production, Redux Thunk reste ajouté par défaut.
+
+Cela signifie qu'une application simple n'a généralement **aucun middleware à configurer manuellement**.
+
+---
+
+# 2.10 Redux Thunk
+
+Thunk permet notamment de dispatcher une fonction au lieu d'une simple action.
+
+Cela permet :
+
+```text
+dispatch
    ↓
-Hook métier
+fonction async
    ↓
-Service API
+API
    ↓
-fetch
+dispatch
+   ↓
+action
+```
+
+Redux Toolkit installe Redux Thunk par défaut.
+
+---
+
+# 2.11 `createAsyncThunk`
+
+Redux Toolkit propose également `createAsyncThunk` pour représenter une opération asynchrone avec un cycle :
+
+```text
+pending
+   ↓
+fulfilled
+
+ou
+
+rejected
 ```
 
 Exemple :
 
 ```ts
-export async function getProducts() {
-  const response = await fetch(
-    `${API_URL}/products`
+export const loadProducts =
+  createAsyncThunk(
+    'products/load',
+    async () => {
+      const response =
+        await fetch(API_URL);
+
+      return response.json();
+    }
   );
+```
 
-  if (!response.ok) {
-    throw new Error("Unable to load products");
+La slice peut ensuite réagir aux actions générées :
+
+```ts
+extraReducers: builder => {
+  builder
+    .addCase(
+      loadProducts.pending,
+      state => {
+        state.loading = true;
+      }
+    )
+
+    .addCase(
+      loadProducts.fulfilled,
+      (state, action) => {
+        state.loading = false;
+        state.items = action.payload;
+      }
+    )
+
+    .addCase(
+      loadProducts.rejected,
+      state => {
+        state.loading = false;
+        state.error = true;
+      }
+    );
+}
+```
+
+On retrouve notre modèle :
+
+```text
+loadProducts()
+      │
+      ▼
+ pending
+      │
+      ▼
+ requête
+   ┌──┴───┐
+   ▼      ▼
+fulfilled rejected
+```
+
+---
+
+# 2.12 Middleware personnalisé
+
+Un middleware Redux possède conceptuellement cette forme :
+
+```ts
+const middleware =
+  store =>
+  next =>
+  action => {
+    // avant
+
+    const result = next(action);
+
+    // après
+
+    return result;
+  };
+```
+
+Le point important pédagogiquement n'est pas sa syntaxe.
+
+C'est sa position :
+
+```text
+ACTION
+  │
+  ▼
+middleware A
+  │
+  ▼
+middleware B
+  │
+  ▼
+REDUCER
+```
+
+---
+
+# 2.13 À quoi peut servir un middleware ?
+
+Exemples raisonnables :
+
+```text
+analytics
+logging
+persistence ciblée
+synchronisation
+gestion d'événements
+orchestration asynchrone
+```
+
+Par exemple :
+
+```text
+orderPlaced
+     │
+     ├── reducer
+     │      ↓
+     │   commande validée
+     │
+     └── middleware
+            ↓
+        analytics
+```
+
+Cela permet de ne pas écrire l'analytics directement dans :
+
+```text
+OrderScreen
+```
+
+---
+
+# 2.14 Listener Middleware
+
+Redux Toolkit fournit également `createListenerMiddleware`.
+
+Son modèle mental est intéressant :
+
+```text
+« Quand cette action arrive,
+exécute cet effet. »
+```
+
+La documentation Redux Toolkit le compare conceptuellement à un `useEffect` réagissant aux modifications Redux plutôt qu'aux props et états d'un composant.
+
+Exemple conceptuel :
+
+```ts
+listenerMiddleware.startListening({
+  actionCreator: orderPlaced,
+
+  effect: async (action, api) => {
+    await saveOrder(action.payload);
   }
-
-  return response.json();
-}
+});
 ```
 
-Puis :
+Cela peut être utile pour découpler :
 
-```tsx
-const products = await getProducts();
+```text
+événement métier
+        ↓
+effets secondaires
 ```
-
-### À retenir
-
-> **Le composant ne devrait pas connaître les détails HTTP lorsque ce n'est pas nécessaire.**
 
 ---
 
-# 7. Toujours représenter les états d'une requête
+# 2.15 Qui fait quoi ?
 
-Une interface dépendante d'une API possède rarement seulement deux états :
-
-```text
-données
-pas de données
-```
-
-Elle possède plutôt :
-
-```text
-idle
- ↓
-loading
- ↓
-success
-   ├── data
-   └── empty
-
-ou
-
-error
-```
-
-Une bonne interface doit donc pouvoir représenter :
-
-```tsx
-if (loading) {
-  return <LoadingView />;
-}
-
-if (error) {
-  return <ErrorView />;
-}
-
-if (products.length === 0) {
-  return <EmptyView />;
-}
-
-return <ProductList products={products} />;
-```
-
-### À retenir
-
-> **Loading, Error et Empty font partie de l'écran.**
-
-Ce ne sont pas des cas exceptionnels.
+| Outil               | Responsabilité                      |
+| ------------------- | ----------------------------------- |
+| `createSlice`       | état + reducers + actions           |
+| reducer             | calcul du nouvel état               |
+| action              | décrit ce qui s'est produit         |
+| selector            | lit l'état                          |
+| thunk               | exécute une logique async commandée |
+| middleware          | intercepte / observe les actions    |
+| listener middleware | réagit à des événements Redux       |
+| `configureStore`    | assemble l'ensemble                 |
 
 ---
 
-# 8. Penser aux interactions tactiles
-
-Sur mobile :
+# 2.16 Modèle architectural raisonnable
 
 ```text
-hover
+features/
+│
+├── favorites/
+│   ├── favoritesSlice.ts
+│   ├── favoritesSelectors.ts
+│   └── components/
+│
+├── orders/
+│   ├── ordersSlice.ts
+│   └── ordersSelectors.ts
+│
+└── products/
+    ├── productsSlice.ts
+    └── productsSelectors.ts
+
+store/
+├── store.ts
+└── listenerMiddleware.ts
 ```
 
-n'existe pas comme interaction principale.
+Il n'est cependant pas nécessaire de créer tous ces fichiers dès le premier jour.
 
-L'utilisateur :
-
-```text
-tap
-long press
-swipe
-drag
-pinch
-```
-
-Il faut donc utiliser des composants et interactions conçus pour le tactile.
-
-Par exemple :
-
-```tsx
-<Pressable
-  onPress={handlePress}
->
-  <Text>Add to favorites</Text>
-</Pressable>
-```
-
-Un `Pressable` permet également de représenter différents états :
-
-```tsx
-<Pressable>
-  {({ pressed }) => (
-    <Text>
-      {pressed ? "Adding..." : "Add"}
-    </Text>
-  )}
-</Pressable>
-```
-
-### À retenir
-
-> **Une interaction mobile doit être pensée avec le doigt, pas avec la souris.**
+La structure doit suivre la complexité réelle.
 
 ---
 
-# 9. Prévoir une surface tactile suffisante
+# 3 — Pièges et verbosité de Redux Toolkit
 
-Une icône visuellement petite peut être difficile à utiliser.
+# 3.1 Redux Toolkit n'est pas nécessaire partout
 
-Par exemple :
+C'est le premier piège.
+
+Une modal :
 
 ```tsx
-<Pressable
-  hitSlop={10}
-  onPress={removeProduct}
->
-  <TrashIcon />
-</Pressable>
+const [visible, setVisible] =
+  useState(false);
 ```
 
-`hitSlop` permet d'augmenter la zone interactive sans nécessairement agrandir visuellement l'élément.
+n'a probablement aucune raison de devenir :
 
-Cela améliore :
+```text
+modalSlice
++
+openModal action
++
+closeModal action
++
+selector
++
+dispatch
+```
 
-* ergonomie ;
-* accessibilité ;
-* tolérance aux mouvements.
+On aurait transformé :
+
+```tsx
+setVisible(true);
+```
+
+en plusieurs concepts.
 
 ---
 
-# 10. Ne pas utiliser uniquement la couleur pour transmettre une information
+# 3.2 Comparaison de verbosité
+
+## État local
+
+```tsx
+const [quantity, setQuantity] =
+  useState(1);
+
+setQuantity(2);
+```
+
+## Redux Toolkit
+
+```ts
+const orderSlice = createSlice({
+  name: 'order',
+
+  initialState: {
+    quantity: 1
+  },
+
+  reducers: {
+    quantityChanged(
+      state,
+      action
+    ) {
+      state.quantity =
+        action.payload;
+    }
+  }
+});
+```
+
+puis :
+
+```tsx
+const quantity = useSelector(
+  state => state.order.quantity
+);
+
+const dispatch = useDispatch();
+
+dispatch(
+  quantityChanged(2)
+);
+```
+
+Redux Toolkit n'est donc pas :
+
+> moins de code que `useState`.
+
+Il est :
+
+> **moins de code que Redux classique pour résoudre un problème d'état global.**
+
+Cette distinction est essentielle.
+
+---
+
+# 3.3 Le coût réel : l'indirection
+
+Avec `useState` :
+
+```text
+Button
+  ↓
+setValue
+  ↓
+value
+```
+
+Avec Redux :
+
+```text
+Button
+  ↓
+dispatch
+  ↓
+action
+  ↓
+middleware
+  ↓
+reducer
+  ↓
+store
+  ↓
+selector
+  ↓
+component
+```
+
+Redux ajoute donc une **indirection volontaire**.
+
+Cette indirection devient utile lorsque plusieurs parties de l'application doivent comprendre et modifier le même état.
+
+Elle devient coûteuse lorsqu'elle ne sert qu'à déplacer une variable.
+
+---
+
+# 3.4 Redux Toolkit réduit le boilerplate, pas le vocabulaire
+
+Pour utiliser correctement Redux Toolkit, il faut comprendre :
+
+```text
+store
+state
+dispatch
+action
+payload
+reducer
+slice
+selector
+middleware
+thunk
+extraReducer
+Immer
+Provider
+```
+
+Puis éventuellement :
+
+```text
+listener
+entityAdapter
+RTK Query
+memoized selector
+```
+
+Ainsi :
+
+> **Redux Toolkit simplifie l'écriture de Redux mais conserve une charge cognitive importante.**
+
+C'est souvent son principal coût pédagogique.
+
+---
+
+# 3.5 Tout mettre dans Redux
+
+Anti-pattern fréquent :
+
+```text
+STORE
+│
+├── modalVisible
+├── keyboardVisible
+├── inputText
+├── currentAnimation
+├── scrollPosition
+├── selectedTemporaryTab
+├── navigationObject
+└── ...
+```
+
+Le store devient alors une représentation de chaque détail de l'interface.
+
+La documentation officielle recommande au contraire d'évaluer où chaque état doit vivre et de garder généralement les valeurs locales près de l'UI.
+
+### Règle pratique
+
+Mettre une donnée dans Redux devient intéressant si plusieurs de ces critères sont vrais :
+
+```text
+partagée ?
+durable ?
+utilisée loin de son origine ?
+modifiée depuis plusieurs endroits ?
+utile au debugging global ?
+porteuse de sens métier ?
+```
+
+---
+
+# 3.6 Stocker des objets non sérialisables
+
+Redux recommande de ne pas stocker :
+
+```text
+functions
+Promises
+class instances
+Map
+Set
+```
+
+ou autres valeurs non sérialisables dans le state et les actions.
+
+Dans React Native, il faut notamment être prudent avec :
+
+```text
+objet navigation
+référence de composant
+native handle
+callback
+Promise
+instance de classe
+```
 
 À éviter :
 
-```text
-Vert = validé
-Rouge = erreur
+```ts
+state.navigation =
+  navigation;
 ```
 
-sans autre indication.
+ou :
 
-Préférer :
+```ts
+state.onComplete =
+  () => {};
+```
+
+---
+
+# 3.7 Pourquoi Redux Toolkit proteste parfois
+
+`configureStore` active en développement un middleware qui vérifie notamment la sérialisabilité du state et des actions.
+
+Ainsi, lorsqu'on voit :
 
 ```text
-✓ Validé
+A non-serializable value
+was detected...
+```
 
-⚠ Erreur
+le premier réflexe ne devrait pas être :
+
+```ts
+serializableCheck: false
+```
+
+mais :
+
+> Pourquoi ai-je placé cette valeur dans Redux ?
+
+Désactiver le contrôle peut masquer le symptôme sans résoudre le problème architectural.
+
+---
+
+# 3.8 L'illusion de mutation avec Immer
+
+Dans un reducer créé par Redux Toolkit :
+
+```ts
+state.quantity++;
+```
+
+est valide.
+
+Mais cela ne signifie pas :
+
+> « Redux autorise maintenant les mutations partout ».
+
+Ce comportement est rendu possible par Immer à l'intérieur des reducers concernés.
+
+Ainsi :
+
+```ts
+state.quantity++;
+```
+
+dans un reducer RTK :
+
+```text
+OK
+```
+
+Mais modifier directement une valeur Redux depuis un composant :
+
+```ts
+order.quantity++;
+```
+
+reste une erreur conceptuelle.
+
+---
+
+# 3.9 Les reducers ne font pas d'I/O
+
+À éviter :
+
+```ts
+reducers: {
+  orderPlaced(state, action) {
+    fetch('/api/order');
+    state.status = 'done';
+  }
+}
+```
+
+Le reducer doit calculer l'état.
+
+Les effets doivent être pris en charge ailleurs :
+
+```text
+Thunk
+Middleware
+Listener Middleware
+RTK Query
+Service appelé en amont
+```
+
+Redux stipule que les reducers ne doivent pas contenir d'effets de bord.
+
+---
+
+# 3.10 `extraReducers` peut devenir une seconde forêt
+
+Au départ :
+
+```ts
+extraReducers: builder => {
+  builder
+    .addCase(load.pending, ...)
+    .addCase(load.fulfilled, ...)
+    .addCase(load.rejected, ...);
+}
+```
+
+est très lisible.
+
+Mais multiplier :
+
+```text
+loadProducts
+refreshProducts
+saveProduct
+deleteProduct
+loadFavorites
+syncProducts
+...
+```
+
+peut créer un bloc important.
+
+La question devient alors :
+
+> Sommes-nous encore en train de gérer de l'état métier, ou sommes-nous en train de reconstruire manuellement une infrastructure de données serveur ?
+
+---
+
+# 3.11 Attention à la donnée serveur
+
+Imaginons :
+
+```text
+products
+```
+
+provenant exclusivement d'une API.
+
+On peut construire manuellement :
+
+```text
+productsSlice
++
+createAsyncThunk
++
+loading
++
+error
++
+cache
++
+refresh
++
+retry
++
+invalidation
+```
+
+Mais Redux Toolkit contient également **RTK Query**, destiné précisément à la récupération et au cache des données serveur.
+
+RTK Query génère notamment sa propre slice et son middleware de gestion du cache.
+
+Ainsi :
+
+```text
+État métier global
+      ↓
+createSlice
+
+Données serveur / cache
+      ↓
+RTK Query
+      ou
+bibliothèque dédiée
+```
+
+est souvent une séparation plus pertinente.
+
+---
+
+# 3.12 Les selectors peuvent provoquer des rerenders inutiles
+
+À éviter systématiquement :
+
+```tsx
+const data = useSelector(
+  state => ({
+    favorites:
+      state.favorites.items,
+    order:
+      state.order
+  })
+);
+```
+
+Cette fonction crée potentiellement un nouvel objet à chaque exécution.
+
+Il est souvent préférable de sélectionner directement les valeurs nécessaires :
+
+```tsx
+const favorites =
+  useSelector(
+    state =>
+      state.favorites.items
+  );
+
+const order =
+  useSelector(
+    state =>
+      state.order
+  );
+```
+
+et d'utiliser des selectors mémorisés lorsque des calculs dérivés complexes le justifient.
+
+---
+
+# 3.13 Ne pas persister aveuglément tout le store
+
+Sur mobile, il peut sembler séduisant de faire :
+
+```text
+STORE
+  ↓
+AsyncStorage
+  ↓
+STORE
+```
+
+pour absolument tout.
+
+Mais certaines données peuvent être :
+
+```text
+obsolètes
+volumineuses
+sensibles
+éphémères
+recalculables
+issues du serveur
+```
+
+On préférera réfléchir par slice ou par donnée :
+
+| Donnée             | Persister ?              |
+| ------------------ | ------------------------ |
+| thème              | probablement             |
+| préférences        | probablement             |
+| panier local       | éventuellement           |
+| modal ouverte      | non                      |
+| position de scroll | rarement                 |
+| cache API complet  | pas automatiquement      |
+| mot de passe       | non                      |
+| token sensible     | stockage sécurisé adapté |
+
+---
+
+# 3.14 Redux peut devenir un Event Bus déguisé
+
+Les actions sont pratiques :
+
+```ts
+dispatch(orderPlaced());
+```
+
+Puis différents middleware peuvent réagir.
+
+Mais si l'application commence à dispatcher des centaines d'actions uniquement pour faire communiquer des morceaux de code :
+
+```text
+ACTION
+ACTION
+ACTION
+ACTION
+ACTION
+```
+
+sans véritable modification d'état, Redux peut progressivement devenir un bus d'événements généraliste.
+
+Cela peut être pertinent dans certains systèmes.
+
+Mais cela doit être une décision architecturale consciente.
+
+---
+
+# 3.15 Middleware : ne pas résoudre tous les problèmes avec un middleware
+
+Un middleware possède beaucoup de pouvoir :
+
+```text
+dispatch
+getState
+async
+intercepter
+transformer
+redispatcher
+```
+
+Cette flexibilité est aussi un danger.
+
+La documentation de `createListenerMiddleware` souligne elle-même que cette liberté est à la fois une force et une faiblesse : elle donne peu de garde-fous.
+
+Avant de créer un middleware, demander :
+
+```text
+Est-ce un effet global ?
+
+Est-il déclenché naturellement
+par une action Redux ?
+
+Doit-il être indépendant
+de l'écran ?
+
+Plusieurs fonctionnalités
+doivent-elles y réagir ?
+```
+
+Sinon un simple service ou hook peut être plus lisible.
+
+---
+
+# 3.16 L'action doit raconter un événement
+
+Moins expressif :
+
+```ts
+dispatch(
+  setOrderStatus('done')
+);
+```
+
+Plus métier :
+
+```ts
+dispatch(
+  orderPlaced(order)
+);
+```
+
+Pourquoi ?
+
+Parce que :
+
+```text
+setOrderStatus
+```
+
+décrit une opération technique.
+
+Alors que :
+
+```text
+orderPlaced
+```
+
+décrit ce qui s'est passé.
+
+Cela devient particulièrement utile lorsqu'un middleware écoute les actions.
+
+```text
+orderPlaced
+   ├── reducer → état
+   ├── analytics
+   ├── persistence
+   └── notification
+```
+
+---
+
+# 3.17 Éviter les slices géantes
+
+Une slice comme :
+
+```text
+appSlice
+```
+
+contenant :
+
+```text
+user
+products
+favorites
+orders
+settings
+notifications
+theme
+```
+
+annule une partie de l'intérêt du découpage.
+
+À l'inverse, créer :
+
+```text
+buttonSlice
+modalSlice
+headerSlice
+```
+
+fragmente inutilement le système.
+
+Le bon niveau se situe généralement autour d'un :
+
+> **domaine fonctionnel cohérent.**
+
+---
+
+# 3.18 Tableau des pièges
+
+| Piège                               | Symptôme                  | Réflexe                         |
+| ----------------------------------- | ------------------------- | ------------------------------- |
+| Tout mettre dans Redux              | énorme store              | garder l'état UI local          |
+| Une slice par écran                 | couplage navigation/store | découper par domaine            |
+| Une slice globale                   | reducer gigantesque       | séparer les responsabilités     |
+| Objet natif dans Redux              | erreur serializable       | stocker des données simples     |
+| `serializableCheck: false` immédiat | masque le problème        | comprendre la donnée            |
+| Fetch dans reducer                  | effets imprévisibles      | thunk/middleware/service        |
+| Beaucoup de `extraReducers`         | code async massif         | questionner RTK Query           |
+| Tout persister                      | état obsolète             | persister sélectivement         |
+| Middleware partout                  | flux difficile à suivre   | réserver aux effets transverses |
+| Selector complexe non mémorisé      | rerenders                 | selector adapté/mémorisé        |
+| Redux pour un input                 | surarchitecture           | `useState`                      |
+| Redux pour toute donnée serveur     | cache artisanal           | outil de server state           |
+
+---
+
+# 3.19 La question de la verbosité
+
+Redux Toolkit résout une grande partie du boilerplate historique de Redux.
+
+Il évite notamment de répéter manuellement :
+
+```text
+ACTION_TYPE
+action creator
+switch
+immutable copy
+combineReducers
+store configuration
+thunk configuration
+DevTools configuration
+```
+
+C'est précisément l'une des raisons d'être de Redux Toolkit.
+
+Mais il ajoute toujours une structure :
+
+```text
+slice
+action
+dispatch
+selector
+store
+Provider
+middleware
+```
+
+On peut donc formuler le compromis ainsi :
+
+```text
+Redux classique
+
+VERBOSITÉ TECHNIQUE
+████████████████████
+
+MODÈLE CONCEPTUEL
+████████████
+
+
+Redux Toolkit
+
+VERBOSITÉ TECHNIQUE
+████████
+
+MODÈLE CONCEPTUEL
+████████████
+
+
+useState
+
+VERBOSITÉ TECHNIQUE
+██
+
+MODÈLE CONCEPTUEL
+██
+```
+
+Redux Toolkit diminue surtout la première ligne.
+
+Pas la seconde.
+
+---
+
+# 3.20 Quand Redux Toolkit devient pertinent
+
+Redux Toolkit devient particulièrement intéressant lorsque l'application possède plusieurs caractéristiques comme :
+
+```text
+état partagé entre beaucoup d'écrans
++
+transitions métier importantes
++
+plusieurs sources de modification
++
+besoin de traçabilité
++
+effets transverses
++
+application durable
+```
+
+Exemple :
+
+```text
+Favorites
+Orders
+User Session
+Permissions métier
+Workflow
+Synchronisation
+```
+
+---
+
+# 3.21 Quand Redux Toolkit est probablement excessif
+
+Application :
+
+```text
+3 écrans
++
+quelques appels API
++
+état principalement local
 ```
 
 avec :
 
 ```text
-couleur
-+
-icône
-+
-texte
+useState
+Context ponctuel
+hooks
+bibliothèque de server state
 ```
 
-La couleur devient alors une information complémentaire et non le seul vecteur de sens.
+peut très bien ne pas avoir besoin de Redux.
+
+L'utilisation d'une bibliothèque ne devient pas une bonne pratique simplement parce qu'elle est standardisée.
 
 ---
 
-# 11. Prévoir l'accessibilité dès le composant
+# Tableau de décision
 
-Une interface accessible est plus simple à maintenir lorsqu'elle est conçue ainsi dès le départ.
+| Besoin                            | Premier choix à considérer      |
+| --------------------------------- | ------------------------------- |
+| état d'un composant               | `useState`                      |
+| logique locale complexe           | `useReducer`                    |
+| état partagé dans une petite zone | Context                         |
+| état métier global                | Redux Toolkit                   |
+| récupération/cache API            | RTK Query ou outil server-state |
+| réaction globale à une action     | Listener Middleware             |
+| opération async commandée         | Thunk                           |
+| préférence persistante            | stockage local                  |
+| secret utilisateur                | stockage sécurisé               |
 
-Exemple :
+Ce tableau n'est pas une règle absolue.
 
-```tsx
-<Pressable
-  accessibilityRole="button"
-  accessibilityLabel="Add product to favorites"
-  onPress={addFavorite}
->
-  <HeartIcon />
-</Pressable>
-```
-
-Sans label, un lecteur d'écran pourrait simplement annoncer quelque chose comme :
-
-```text
-button
-```
-
-Avec un label :
+Il sert à éviter :
 
 ```text
-Add product to favorites, button
-```
-
-### À retenir
-
-> **Si l'interface utilise uniquement une icône, demander ce qu'un utilisateur ne voyant pas l'icône doit entendre.**
-
----
-
-# 12. Prendre en compte les Safe Areas
-
-Les téléphones possèdent désormais différents éléments physiques et système :
-
-```text
-notch
-dynamic island
-status bar
-navigation bar
-rounded corners
-```
-
-Le contenu principal ne devrait donc pas supposer que tout l'écran est utilisable.
-
-On utilise généralement une gestion appropriée des safe areas au niveau de la structure de l'application ou des écrans concernés.
-
-### Mauvais modèle mental
-
-```text
-écran = rectangle entièrement disponible
-```
-
-### Bon modèle mental
-
-```text
-écran physique
-┌──────────────────────┐
-│ zone système         │
-│ ┌──────────────────┐ │
-│ │ contenu utile    │ │
-│ └──────────────────┘ │
-│ zone système         │
-└──────────────────────┘
-```
-
----
-
-# 13. Penser au clavier
-
-Un formulaire mobile doit gérer l'apparition du clavier.
-
-Sinon :
-
-```text
-Input
-Input
-Input
-[ Submit ]
-████████████
-  CLAVIER
-████████████
-```
-
-Le bouton peut devenir inaccessible.
-
-Il faut donc penser :
-
-* déplacement du contenu ;
-* scroll ;
-* fermeture du clavier ;
-* comportement Android/iOS ;
-* ordre des champs.
-
-### À retenir
-
-> **Tester un formulaire avec le clavier ouvert, pas seulement dans le simulateur avec le clavier masqué.**
-
----
-
-# 14. Utiliser Expo Router comme structure de navigation
-
-Dans un projet Expo moderne, Expo Router offre une approche file-based.
-
-Exemple :
-
-```text
-app/
-├── _layout.tsx
-├── index.tsx
-├── products/
-│   ├── index.tsx
-│   └── [id].tsx
-├── favorites.tsx
-└── settings.tsx
-```
-
-Ce modèle permet de faire correspondre naturellement :
-
-```text
-structure fichiers
-        ↓
-structure navigation
-        ↓
-routes
-```
-
-Une règle importante reste cependant :
-
-> **Une route est un point d'entrée, pas nécessairement tout le composant fonctionnel.**
-
-Par exemple :
-
-```text
-app/products/[id].tsx
-```
-
-peut rester très léger :
-
-```tsx
-export default function Page() {
-  return <ProductDetailsScreen />;
-}
-```
-
-La logique métier reste alors indépendante du routeur.
-
----
-
-# 15. Expo Go pour découvrir, Development Build pour développer
-
-Expo Go est particulièrement adapté à :
-
-```text
-apprentissage
-POC
-démonstration
-petits exercices
-```
-
-Mais une véritable application finit généralement par nécessiter :
-
-```text
-modules natifs
-configuration native
-permissions
-deep links
-notifications
-services externes
-```
-
-On utilisera alors un **Development Build**.
-
-## Modèle mental
-
-```text
-Expo Go
+Problème
    ↓
-runtime Expo générique
+Redux
+```
 
-Development Build
+et à préférer :
+
+```text
+Problème
    ↓
-runtime natif propre
-à l'application
-```
-
-### À retenir
-
-> **Expo Go est un excellent bac à sable, pas la définition d'une architecture Expo.**
-
----
-
-# 16. Installer les modules compatibles avec l'Expo SDK
-
-Pour les dépendances concernées, préférer :
-
-```bash
-npx expo install expo-camera
-```
-
-à :
-
-```bash
-npm install expo-camera
-```
-
-`expo install` permet à Expo de sélectionner une version cohérente avec le SDK installé.
-
-Cette discipline devient particulièrement importante pour les bibliothèques ayant une composante native.
-
----
-
-# 17. Vérifier régulièrement le projet avec Expo Doctor
-
-Une application Expo dépend de versions qui doivent rester cohérentes :
-
-```text
-Expo SDK
-React Native
-React
-modules Expo
-modules natifs
-```
-
-Un bon réflexe est :
-
-```bash
-npx expo-doctor
-```
-
-et lorsque nécessaire :
-
-```bash
-npx expo install --fix
-```
-
-### À retenir
-
-> **Les dépendances natives ne se mettent pas à jour aussi librement qu'un package JavaScript isolé.**
-
----
-
-# 18. Préférer la configuration déclarative au bricolage natif
-
-Avec Expo, beaucoup de configurations passent par :
-
-```text
-app.json
-```
-
-ou :
-
-```text
-app.config.ts
-```
-
-Exemple conceptuel :
-
-```ts
-export default {
-  expo: {
-    name: "My App",
-    orientation: "portrait",
-    plugins: [
-      "expo-camera"
-    ]
-  }
-};
-```
-
-Puis Expo peut générer les projets :
-
-```text
-ios/
-android/
-```
-
-Cette approche fait partie de la logique de **Continuous Native Generation**.
-
-### À éviter
-
-Modifier manuellement :
-
-```text
-ios/
-android/
-```
-
-puis supposer que ces modifications seront toujours conservées lorsque ces répertoires sont générés.
-
-### Préférer
-
-```text
-configuration Expo
-+
-Config Plugin
-```
-
-lorsqu'une modification native doit être reproductible.
-
-### À retenir
-
-> **Décrire le natif plutôt que le modifier à la main lorsque la génération Expo est utilisée.**
-
----
-
-# 19. Traiter les permissions comme une expérience utilisateur
-
-La caméra, les notifications, la localisation ou les photos nécessitent des permissions.
-
-Mauvaise expérience :
-
-```text
-Ouverture application
-        ↓
-"Autoriser caméra ?"
-        ↓
-"Autoriser localisation ?"
-        ↓
-"Autoriser notifications ?"
-```
-
-L'utilisateur ne sait pas encore pourquoi.
-
-Meilleure séquence :
-
-```text
-Utilisateur choisit
-"Scanner un produit"
-        ↓
-L'application explique
-pourquoi la caméra est nécessaire
-        ↓
-Demande permission
-```
-
-### À retenir
-
-> **Demander une permission au moment où sa valeur devient compréhensible.**
-
----
-
-# 20. Ne jamais considérer `EXPO_PUBLIC_*` comme secret
-
-Expo remplace les variables :
-
-```text
-EXPO_PUBLIC_*
-```
-
-dans le bundle client.
-
-Elles peuvent donc être observées par quelqu'un disposant de l'application. Expo indique explicitement qu'elles ne doivent pas contenir de secrets.
-
-### Correct
-
-```env
-EXPO_PUBLIC_API_URL=https://api.example.com
-```
-
-### Incorrect
-
-```env
-EXPO_PUBLIC_DATABASE_PASSWORD=supersecret
-```
-
-### Règle
-
-```text
-Dans l'application cliente
-        =
-considérer la valeur publique
-```
-
-Les secrets doivent rester sur :
-
-```text
-backend
-CI/CD
-EAS Build
-service sécurisé
-```
-
-selon leur utilisation.
-
----
-
-# 21. Distinguer stockage et stockage sécurisé
-
-Tout stockage local n'a pas le même besoin de sécurité.
-
-## Préférences ordinaires
-
-Exemples :
-
-```text
-thème
-langue
-onboarding terminé
-quantité par défaut
-```
-
-Un stockage persistant classique peut suffire.
-
-## Données sensibles
-
-Exemples :
-
-```text
-credential
-token
-clé locale sensible
-```
-
-Une solution comme :
-
-```text
-expo-secure-store
-```
-
-est plus adaptée.
-
-### À retenir
-
-> **Persistance ≠ sécurité.**
-
----
-
-# 22. Distinguer build et update
-
-Avec Expo/EAS :
-
-```text
-Build
-```
-
-et :
-
-```text
-Update
-```
-
-ne représentent pas la même opération.
-
-## Build
-
-Produit le runtime natif :
-
-```text
-React Native
-modules natifs
-permissions
-configuration native
-```
-
-## Update
-
-Peut distribuer notamment :
-
-```text
-JavaScript
-assets
-```
-
-compatibles avec le runtime déjà installé.
-
-Donc :
-
-```text
-modification JS
-     ↓
-potentiellement OTA
-
-modification native
-     ↓
-nouveau build
-```
-
-### À retenir
-
-> **Une update ne peut pas inventer du code natif absent du binaire installé.**
-
----
-
-# 23. Séparer les environnements
-
-Une application réelle possède généralement :
-
-```text
-development
-preview
-production
-```
-
-Cette séparation peut concerner :
-
-```text
-API
-configuration
-build
-distribution
-variables
-updates
-```
-
-EAS propose précisément ces trois environnements par défaut pour gérer les variables et les builds.
-
-Exemple conceptuel :
-
-```text
-development
+nature du problème
    ↓
-api-dev.example.com
-
-preview
-   ↓
-api-staging.example.com
-
-production
-   ↓
-api.example.com
-```
-
-### À retenir
-
-> **Le build de test ne devrait pas devenir accidentellement le build de production.**
-
----
-
-# 24. Tester sur un véritable appareil
-
-Le simulateur est extrêmement utile.
-
-Mais il ne reproduit pas parfaitement :
-
-```text
-performances
-mémoire
-caméra
-GPS
-notifications
-gestes
-clavier
-réseau mobile
-orientation
-mise en veille
-```
-
-La stratégie peut être :
-
-```text
-développement quotidien
-       ↓
-simulateur
-
-régulièrement
-       ↓
-vrai appareil
-
-avant livraison
-       ↓
-plusieurs appareils
+outil adapté
 ```
 
 ---
 
-# 25. Mesurer les performances en production
+# Synthèse des trois temps
 
-Le mode développement ajoute :
-
-```text
-debug
-warnings
-outils
-instrumentation
-```
-
-Il n'est donc pas représentatif d'une application finale.
-
-Pour analyser les performances :
+## Temps 1 — Le modèle
 
 ```text
-build release
-+
-appareil réel
-+
-scénario reproductible
+UI
+ │
+dispatch
+ │
+ ▼
+ACTION
+ │
+ ▼
+REDUCER
+ │
+ ▼
+STORE
+ │
+selector
+ │
+ ▼
+UI
 ```
 
-React Native recommande explicitement d'évaluer les performances dans un build release.
-
-### À retenir
-
-> **Une application lente en développement n'est pas nécessairement lente en production — et inversement.**
+À comprendre avant toute API.
 
 ---
 
-# 26. Tester le comportement plutôt que les détails internes
-
-Prenons :
-
-```tsx
-function FavoriteButton() {
-  const [favorite, setFavorite] = useState(false);
-
-  // ...
-}
-```
-
-Un test fragile vérifierait :
+## Temps 2 — L'outillage
 
 ```text
-favorite === true
+configureStore
+     │
+     ├── slice
+     │    ├── state
+     │    ├── reducers
+     │    └── actions
+     │
+     ├── middleware
+     │
+     └── thunk
 ```
 
-Un test orienté utilisateur vérifierait :
-
-```text
-Je presse le bouton
-        ↓
-le produit apparaît comme favori
-```
-
-La seconde approche reste valable même si l'implémentation change complètement.
+Redux Toolkit industrialise le modèle Redux.
 
 ---
 
-# 27. Ne pas oublier les états métier inhabituels
+## Temps 3 — Le discernement
 
-Une application mobile doit être pensée dans des situations moins idéales.
+La question finale n'est pas :
 
-Par exemple :
+> Comment mettre cette donnée dans Redux ?
 
-```text
-Que se passe-t-il si…
+Mais :
 
-l'API ne répond pas ?
-le réseau disparaît ?
-l'utilisateur double-clique ?
-la permission est refusée ?
-l'application reprend après 20 minutes ?
-la liste est vide ?
-le token expire ?
-l'utilisateur revient en arrière ?
-```
-
-Une bonne pratique de conception consiste à tester :
-
-```text
-Happy Path
-+
-Unhappy Paths
-```
+> **Cette donnée a-t-elle une raison suffisante d'être dans Redux ?**
 
 ---
 
-# 28. Une architecture raisonnable avant une architecture parfaite
+# Les 10 réflexes à retenir
 
-Un projet pédagogique ou de taille moyenne peut très bien démarrer avec :
+1. **Redux contient l'état global utile, pas tout l'état de React.**
+2. **Une action décrit ce qui s'est produit.**
+3. **Un reducer transforme l'état sans effet de bord.**
+4. **Une slice représente un domaine cohérent du store.**
+5. **Un selector lit uniquement les données nécessaires.**
+6. **Le middleware appartient aux effets transverses autour des actions.**
+7. **Thunk permet d'orchestrer de l'asynchrone ; il est déjà configuré par Redux Toolkit.**
+8. **Les données Redux doivent rester principalement sérialisables.**
+9. **RTK Query évite de reconstruire manuellement une grande partie de la gestion du server state.**
+10. **Redux Toolkit réduit le boilerplate Redux ; il ne rend pas Redux conceptuellement gratuit.**
+
+---
+
+# Formule pédagogique finale
 
 ```text
-src/
-├── components/
-├── features/
-│   ├── products/
-│   ├── favorites/
-│   └── orders/
-├── services/
-├── hooks/
-├── types/
-└── utils/
+React State
+    ↓
+« Mon composant a besoin
+de mémoriser quelque chose. »
 
-app/
-├── _layout.tsx
-├── index.tsx
-├── discover.tsx
-├── favorites.tsx
-├── orders.tsx
-└── settings.tsx
+
+Redux Toolkit
+    ↓
+« Mon application a besoin
+de partager et contrôler
+un état commun. »
 ```
 
-Puis évoluer lorsque les besoins apparaissent.
+Et le principe essentiel :
 
-Il n'est pas nécessaire de commencer avec :
-
-```text
-Clean Architecture
-+
-DDD
-+
-CQRS
-+
-12 couches
-```
-
-pour afficher quelques produits.
-
-### À retenir
-
-> **L'architecture doit absorber la complexité existante, pas anticiper toutes les complexités imaginables.**
-
----
-
-# Tableau récapitulatif
-
-| Situation              | À éviter                                | Préférer                             |
-| ---------------------- | --------------------------------------- | ------------------------------------ |
-| Grande liste           | `ScrollView + map()`                    | `FlatList`                           |
-| Calcul dérivé          | `useEffect + setState`                  | calcul pendant le rendu              |
-| État local             | store global                            | `useState`                           |
-| Logique réseau         | directement partout dans les composants | service / hook                       |
-| État API               | uniquement `data`                       | loading/error/empty/data             |
-| Interaction            | pensée souris                           | pensée tactile                       |
-| Icône                  | interaction sans label                  | accessibilité explicite              |
-| Formulaire             | ignorer le clavier                      | prévoir clavier + scroll             |
-| Navigation Expo        | gros composant route                    | route légère + screen                |
-| Début Expo             | uniquement Expo Go                      | Development Build dès que nécessaire |
-| Package natif          | version arbitraire                      | `expo install`                       |
-| Configuration native   | modifications manuelles dispersées      | config + plugin                      |
-| Permission             | demander au démarrage                   | demander dans le contexte            |
-| Secret                 | `EXPO_PUBLIC_SECRET`                    | backend / secret EAS                 |
-| Donnée sensible locale | stockage ordinaire                      | SecureStore                          |
-| Modification native    | EAS Update                              | nouveau build                        |
-| Environnements         | configuration unique                    | dev / preview / prod                 |
-| Performance            | mesurer en dev                          | build release + appareil réel        |
-| Tests                  | détails d'implémentation                | comportement utilisateur             |
-| Architecture           | surarchitecture initiale                | complexité progressive               |
-
----
-
-# Checklist avant de considérer un écran terminé
-
-## Interface
-
-* [ ] L'écran fonctionne sur plusieurs tailles.
-* [ ] Les Safe Areas sont prises en compte.
-* [ ] Le clavier ne masque pas les actions.
-* [ ] Les zones tactiles sont suffisamment accessibles.
-* [ ] Les icônes importantes possèdent une alternative accessible.
-
-## Données
-
-* [ ] Le chargement est représenté.
-* [ ] Une erreur est représentée.
-* [ ] Une liste vide possède un comportement défini.
-* [ ] Une requête lente ne bloque pas l'interface inutilement.
-
-## Navigation
-
-* [ ] Le retour fonctionne.
-* [ ] Les paramètres de route sont contrôlés.
-* [ ] Une route ne porte pas inutilement toute la logique métier.
-
-## Mobile
-
-* [ ] La permission refusée est prise en compte.
-* [ ] La perte de réseau ne provoque pas un état incohérent.
-* [ ] L'écran a été essayé sur un appareil réel.
-
-## Expo
-
-* [ ] Les dépendances natives sont compatibles avec le SDK.
-* [ ] `expo-doctor` ne révèle pas de problème significatif.
-* [ ] Les secrets ne sont pas dans `EXPO_PUBLIC_*`.
-* [ ] Les configurations natives sont reproductibles.
-* [ ] Les environnements development / preview / production sont distingués lorsque nécessaire.
-
----
-
-# Les 12 réflexes essentiels
-
-Pour une formation, on peut finalement condenser le document en douze réflexes :
-
-1. **Un écran compose, il ne fait pas tout.**
-2. **Un état reste local tant qu'il peut rester local.**
-3. **Une valeur calculable n'est pas forcément un état.**
-4. **Un `useEffect` synchronise avec l'extérieur.**
-5. **Une grande collection utilise une liste virtualisée.**
-6. **Loading, Error et Empty sont de vrais états UI.**
-7. **Une interface mobile est pensée pour le doigt.**
-8. **Le clavier, les permissions et les Safe Areas font partie du design.**
-9. **Expo Go sert à découvrir ; le Development Build sert au vrai développement.**
-10. **Avec Expo, préférer configuration reproductible et packages compatibles.**
-11. **Ce qui est dans le client doit être considéré comme observable.**
-12. **Tester et optimiser ce que vit l'utilisateur plutôt que ce que l'on imagine.**
-
----
-
-# Modèle mental final
-
-```text
-                USER
-                  │
-          interactions mobiles
-                  │
-                  ▼
-             COMPONENTS
-                  │
-         état UI local
-                  │
-                  ▼
-              FEATURES
-             /        \
-        hooks        métier
-          │
-          ▼
-       SERVICES
-          │
-          ▼
-         API
-
-
-           Infrastructure mobile
-                  │
-                  ▼
-                EXPO
-        ┌─────────┼─────────┐
-        │         │         │
-     Router      SDK      Config
-        │         │       Plugins
-        └─────────┼─────────┘
-                  │
-                  ▼
-            React Native
-                  │
-          ┌───────┴───────┐
-          ▼               ▼
-        iOS             Android
-```
-
-La règle directrice peut se résumer ainsi :
-
-> **React organise l'interface et l'état.
-> React Native apporte le modèle mobile.
-> Expo fournit une trajectoire structurée vers le natif et la livraison.**
+> **Redux Toolkit est excellent lorsqu'on a un problème Redux.
+> Le piège est de transformer chaque problème d'état en problème Redux.**
