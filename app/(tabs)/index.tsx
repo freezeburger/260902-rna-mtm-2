@@ -9,7 +9,7 @@ import { ThemedView } from '@/components/themed-view';
 import React, { useMemo } from 'react';
 
 
-import Title from '@/components/Title';
+import Title from '@/src/components/Title';
 
 
 /**
