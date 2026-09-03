@@ -6,6 +6,7 @@ import React, { type FC } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 /** External Libraries Imports */
+import { Image } from 'expo-image';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -45,7 +46,21 @@ const OrdersScreen:FC = () => {
             onAction={() => router.push('/(tabs)/favorites')}
           />
         ) : (
-          <ContentCard title={selectedProduct.title} subtitle={`Unit price: ${selectedProduct.price.toFixed(2)} €`}>
+          <ContentCard>
+            <View style={styles.productHeader}>
+              <Image
+                source={{ uri: selectedProduct.thumbnail }}
+                style={styles.productImage}
+                contentFit="cover"
+                accessibilityLabel={`${selectedProduct.title} product image`}
+              />
+              <View style={styles.productInfo}>
+                <Text style={[styles.productTitle, { color: colors.text }]}>{selectedProduct.title}</Text>
+                <Text style={[styles.productPrice, { color: colors.textMuted }]}>
+                  {selectedProduct.price.toFixed(2)} €
+                </Text>
+              </View>
+            </View>
             <View style={styles.row}>
               <Text style={[styles.label, { color: colors.textMuted }]}>Quantity</Text>
               <NumericInput value={quantity} onChange={setQuantity} min={1} accessibilityLabel="order quantity" />
@@ -85,6 +100,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 16,
+  },
+  productHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+  },
+  productImage: {
+    borderRadius: 8,
+    height: 76,
+    marginRight: 16,
+    width: 76,
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  productPrice: {
+    fontSize: 14,
+    marginTop: 4,
   },
   label: {
     fontSize: 15,

@@ -91,3 +91,11 @@
   d'appui long afin qu'elle occupe toute la largeur disponible pour les actions
   `Place order` et `Save changes`, conformément à la maquette.
 - **Commentaire Git suggéré :** `style: widen rectangular long press actions`
+
+## 2026-09-03
+
+- **Fichiers :** `src/screens/OrdersScreen.tsx`
+- **Description :** Ajout de l'image du produit sélectionné dans l'écran de
+  commande, avec présentation en ligne de l'image, du nom et du prix comme dans
+  la maquette.
+- **Commentaire Git suggéré :** `feat: show selected product image in orders`
