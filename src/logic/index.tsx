@@ -5,6 +5,8 @@ import {
 } from '@reduxjs/toolkit';
 import { useEffect, useState } from 'react';
 
+import devToolsEnhancer from 'redux-devtools-expo-dev-plugin';
+
 const notificationState = {
     messages: '',
     notifications: [
@@ -42,7 +44,7 @@ const logMiddleware: Middleware<{}, NotificationState> =
         console.log('Middleware State:', store.getState());
         console.log('Middleware Dispatching action:', action);
 
-        //return next(action);
+        return next(action);
     };
 
 
@@ -53,7 +55,7 @@ export const notificationStore = configureStore({
 
     // npx expo install redux-devtools-expo-dev-plugin
     // npx redux-devtools-expo-dev-plugin
-    // enhancers: (getDefaultEnhancers) => getDefaultEnhancers().concat(devToolsEnhancer()),
+    enhancers: (getDefaultEnhancers) => getDefaultEnhancers().concat(devToolsEnhancer()),
 
 });
 

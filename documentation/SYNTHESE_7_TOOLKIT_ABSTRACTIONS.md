@@ -3,14 +3,14 @@
 
 Redux Toolkit simplifie énormément Redux, mais au prix de plusieurs **abstractions qui masquent des mécanismes Redux/JavaScript importants**.
 
-| Abstraction RTK          | Ce qu’elle simplifie / masque                          | Complexité pédagogique introduite                          | Niveau        |
+| Abstraction           | Ce qu’elle simplifie / masque                          | Complexité pédagogique introduite                          | Niveau        |
 | ------------------------ | ------------------------------------------------------ | ---------------------------------------------------------- | ------------- |
 | `configureStore()`       | `createStore`, `combineReducers`, middleware, DevTools | Beaucoup de configuration devient implicite                | 🟢 Faible     |
 | `createSlice()`          | Actions + action creators + reducer                    | Un même objet fabrique plusieurs concepts Redux            | 🟢 Faible     |
 | `slice.actions`          | Création manuelle des action creators                  | Les actions semblent « apparaître » automatiquement        | 🟢 Faible     |
 | `slice.reducer`          | `switch(action.type)` classique                        | Le lien `action → reducer` devient moins visible           | 🟢 Faible     |
 | **Immer**                | Immutabilité du state                                  | On écrit `state.value = x` alors que Redux reste immutable | 🟡 Importante |
-| `PayloadAction<T>`       | Typage de `action.payload`                             | Ajoute une abstraction TypeScript propre à RTK             | 🟢 Faible     |
+| `PayloadAction<T>`       | Typage de `action.payload`                             | Ajoute une abstraction TypeScript             | 🟢 Faible     |
 | Middleware par défaut    | thunk, contrôles d'immutabilité/sérialisation, etc.    | `configureStore` fait plus que ce que montre le code       | 🟡 Moyenne    |
 | `getDefaultMiddleware()` | Construction de la chaîne middleware                   | Il faut comprendre pourquoi on fait `.concat(...)`         | 🟡 Moyenne    |
 | `createAsyncThunk()`     | Cycle d'une opération async                            | Génère automatiquement `pending / fulfilled / rejected`    | 🟠 Forte      |
@@ -23,7 +23,7 @@ Redux Toolkit simplifie énormément Redux, mais au prix de plusieurs **abstract
 
 ### Le point pédagogique principal
 
-Je séparerais RTK en **trois couches** :
+ **trois couches** :
 
 ```text
 Redux Toolkit

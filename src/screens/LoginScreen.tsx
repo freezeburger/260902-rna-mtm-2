@@ -36,7 +36,7 @@ const LoginScreen:FC = () => {
       return;
     }
     setUsername(draftUsername.trim());
-    router.replace('/(tabs)');
+    //router.replace('/(tabs)');
   };
 
   return (
