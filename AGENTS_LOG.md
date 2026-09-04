@@ -272,3 +272,10 @@
 - **Description :** Ajout d'un client RTK Query pour l'API JSON Server products,
   avec requêtes de liste et par identifiant, mutations CRUD et invalidation du cache.
 - **Commentaire Git suggéré :** `feat: add products RTK Query client`
+
+## 2026-09-04
+
+- **Fichier :** `src/logic/api/products.api.ts`
+- **Description :** Ajout d'exemples commentés d'utilisation RTK Query avec les
+  hooks de composant et le dispatch/sélecteur de cache hors composant.
+- **Commentaire Git suggéré :** `docs: document RTK Query usage patterns`
