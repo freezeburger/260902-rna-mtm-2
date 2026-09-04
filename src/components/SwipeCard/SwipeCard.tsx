@@ -26,6 +26,7 @@ const SwipeCard: FC<SwipeCardProps> = ({
   leftColor = '#D32F2F',
   rightColor = '#1473E6',
 }) => {
+
   const { colors } = useAppTheme();
   const translateX = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(1)).current;
@@ -38,7 +39,7 @@ const SwipeCard: FC<SwipeCardProps> = ({
     Animated.parallel([
       Animated.spring(translateX, { toValue: 0, damping: 9, stiffness: 180, useNativeDriver: false }),
       Animated.sequence([
-        Animated.spring(scale, { toValue: 1.03, damping: 6, stiffness: 240, useNativeDriver: false }),
+        Animated.spring(scale, { toValue: 1.05, damping: 6, stiffness: 240, useNativeDriver: false }),
         Animated.spring(scale, { toValue: 1, damping: 8, stiffness: 180, useNativeDriver: false }),
       ]),
     ]).start();
@@ -46,7 +47,7 @@ const SwipeCard: FC<SwipeCardProps> = ({
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 10,
+      onMoveShouldSetPanResponder: (_, gestureState) => true, // Math.abs(gestureState.dx) > 10,
       onPanResponderMove: (_, gestureState) => {
         translateX.setValue(gestureState.dx);
       },
