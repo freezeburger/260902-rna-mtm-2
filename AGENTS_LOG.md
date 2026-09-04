@@ -279,3 +279,10 @@
 - **Description :** Ajout d'exemples commentés d'utilisation RTK Query avec les
   hooks de composant et le dispatch/sélecteur de cache hors composant.
 - **Commentaire Git suggéré :** `docs: document RTK Query usage patterns`
+
+## 2026-09-04
+
+- **Fichier :** `src/logic/products/products.slice.ts`
+- **Description :** Synchronisation de la slice products avec les réponses RTK
+  Query réussies pour la liste et les mutations CRUD de l'API JSON Server.
+- **Commentaire Git suggéré :** `feat: sync products slice with API results`
