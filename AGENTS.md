@@ -13,8 +13,7 @@ Avant toute modification, consulter les documents du projet dans
   généraux React Native et Expo ;
 - [`SYNTHESE_2_BP.md`](documentation/SYNTHESE_2_BP.md) — bonnes pratiques
   concrètes pour les composants, listes, navigation, UX mobile et Expo Router ;
-- [`SYNTHESE_3_REDUX.md`](documentation/SYNTHESE_3_REDUX.md) — recommandations
-  concernant l'état partagé, Redux et l'organisation par fonctionnalités.
+
 
 Le workplan et la documentation fonctionnelle définissent le comportement
 attendu ; les synthèses servent de guide technique pour l'implémentation.
@@ -26,10 +25,13 @@ projet.
 - Toute modification réalisée par une IA doit rester petite, ciblée et
   limitée au besoin demandé. Éviter les refactorisations ou changements
   connexes non nécessaires.
+
 - Toute modification réalisée par une IA doit être tracée dans
   [`AGENTS_LOG.md`](AGENTS_LOG.md).
+
 - Chaque entrée du journal doit préciser la date, les fichiers concernés, une
   description concise du changement et un commentaire Git suggéré.
+  
 - Tout code boilerplate doit d'abord être créé avec la commande `$command`
   correspondante définie dans [`generate-react-cli.json`](generate-react-cli.json)
   afin de respecter les templates et conventions du projet. Les ajustements
