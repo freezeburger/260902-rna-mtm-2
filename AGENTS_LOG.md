@@ -247,3 +247,10 @@
 - **Description :** Ajout du provider Redux au layout racine et connexion du
   login au store racine via `logic.settings.actions.setUsername`.
 - **Commentaire Git suggéré :** `feat: connect login to root Redux store`
+
+## 2026-09-04
+
+- **Fichier :** `src/screens/SettingsScreen.tsx`
+- **Description :** Connexion de l'écran Settings au store Redux racine avec les
+  sélecteurs et actions `logic.settings`, en conservant les brouillons locaux.
+- **Commentaire Git suggéré :** `feat: connect settings to root Redux store`

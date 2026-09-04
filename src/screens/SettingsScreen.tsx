@@ -7,9 +7,11 @@ import { Alert, ScrollView, StyleSheet } from 'react-native';
 
 /** External Libraries Imports */
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
 
 /** Hooks Imports */
-import { useAppState, useAppTheme } from '@/src/hooks';
+import { useAppTheme } from '@/src/hooks';
+import { type AppDispatch, logic } from '@/src/logic/root.store';
 
 /** Local Imports */
 import ContentCard from '@/src/components/ContentCard';
@@ -22,18 +24,21 @@ import Switch from '@/src/components/Switch';
 
 const SettingsScreen:FC = () => {
   const { colors } = useAppTheme();
-  const { state, updateSettings } = useAppState();
+  const dispatch = useDispatch<AppDispatch>();
+  const settings = useSelector(logic.settings.selectors.selectSettings);
 
-  const [draftUsername, setDraftUsername] = useState(state.username);
-  const [draftQuantity, setDraftQuantity] = useState(state.defaultOrderQuantity);
+  const [draftUsername, setDraftUsername] = useState(settings.username);
+  const [draftQuantity, setDraftQuantity] = useState(settings.defaultOrderQuantity);
 
-  const hasChanges = draftUsername.trim() !== state.username || draftQuantity !== state.defaultOrderQuantity;
+  const hasChanges =
+    draftUsername.trim() !== settings.username ||
+    draftQuantity !== settings.defaultOrderQuantity;
 
   const handleSave = () => {
-    updateSettings({
-      username: draftUsername.trim() || state.username,
+    dispatch(logic.settings.actions.updateSettings({
+      username: draftUsername.trim() || settings.username,
       defaultOrderQuantity: draftQuantity,
-    });
+    }));
     Alert.alert('Settings saved', 'Your preferences have been updated.');
   };
 
@@ -72,14 +77,18 @@ const SettingsScreen:FC = () => {
           <Switch
             label="Notifications"
             icon="notifications-outline"
-            value={state.notificationsEnabled}
-            onValueChange={(value) => updateSettings({ notificationsEnabled: value })}
+            value={settings.notificationsEnabled}
+            onValueChange={(notificationsEnabled) =>
+              dispatch(logic.settings.actions.updateSettings({ notificationsEnabled }))
+            }
           />
           <Switch
             label="Dark mode"
             icon="moon-outline"
-            value={state.darkModeEnabled}
-            onValueChange={(value) => updateSettings({ darkModeEnabled: value })}
+            value={settings.darkModeEnabled}
+            onValueChange={(darkModeEnabled) =>
+              dispatch(logic.settings.actions.updateSettings({ darkModeEnabled }))
+            }
           />
         </ContentCard>
       </ScrollView>
