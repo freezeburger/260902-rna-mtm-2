@@ -10,12 +10,16 @@ import { useRouter } from 'expo-router';
 
 /** Hooks Imports */
 import { useAppState, useAppTheme } from '@/src/hooks';
+import { useNotificationStore } from '@/src/logic';
 
 /** Local Imports */
 import Button from '@/src/components/Button';
 import Input from '@/src/components/Input';
 
 const LoginScreen:FC = () => {
+
+  const { state, dispatch} = useNotificationStore();
+
   const { colors } = useAppTheme();
   const { setUsername } = useAppState();
   const router = useRouter();
@@ -24,6 +28,10 @@ const LoginScreen:FC = () => {
   const canContinue = draftUsername.trim().length > 0;
 
   const handleContinue = () => {
+    
+    dispatch({ type: 'ADD_NOTIFICATION', payload: `User ${draftUsername.trim()} is attempting to log in.` });
+    console.log('Current notifications state:', state);
+
     if (!canContinue) {
       return;
     }

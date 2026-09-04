@@ -2,15 +2,19 @@
   "logs": [
     {
       "id": "1",
-      "message":"This is log message 1"
+      "message": "This is log message 1"
     },
     {
       "id": "2",
-      "message":"This is log message 2"
+      "message": "This is log message 2"
     },
     {
       "id": "3",
-      "message":"This is log message 3"
+      "message": "This is log message 3"
+    },
+    {
+      "message": "This is log message 3",
+      "id": "fTcYQCrGczY"
     }
   ],
   "orders": [],
@@ -6639,5 +6643,6 @@
       "live": null,
       "id": "df83"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }
