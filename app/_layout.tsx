@@ -1,9 +1,11 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Provider } from 'react-redux';
 import 'react-native-reanimated';
 
 import { useAppTheme } from '@/src/hooks';
+import { rootStore } from '@/src/logic/root.store';
 import { AppStateProvider } from '@/src/store/AppStateContext';
 
 export const unstable_settings = {
@@ -27,8 +29,10 @@ function RootNavigation() {
 
 export default function RootLayout() {
   return (
-    <AppStateProvider>
-      <RootNavigation />
-    </AppStateProvider>
+    <Provider store={rootStore}>
+      <AppStateProvider>
+        <RootNavigation />
+      </AppStateProvider>
+    </Provider>
   );
 }

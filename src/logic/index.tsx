@@ -48,7 +48,7 @@ export const notificationStore = configureStore({
 
     // npx expo install redux-devtools-expo-dev-plugin
     // In expo cli more tools (shift+m) > Open redux-devtools-expo-dev-plugin
-    enhancers: (getDefaultEnhancers) => getDefaultEnhancers().concat(devToolsEnhancer()),
+    //enhancers: (getDefaultEnhancers) => getDefaultEnhancers().concat(devToolsEnhancer()),
 
 });
 

@@ -7,10 +7,11 @@ import { KeyboardAvoidingView, Platform, Text, View } from 'react-native';
 
 /** External Libraries Imports */
 import { useRouter } from 'expo-router';
+import { useDispatch } from 'react-redux';
 
 /** Hooks Imports */
-import { useAppState, useAppTheme } from '@/src/hooks';
-import { useNotificationStore } from '@/src/logic';
+import { useAppTheme } from '@/src/hooks';
+import { type AppDispatch, logic } from '@/src/logic/root.store';
 
 /** Local Imports */
 import Button from '@/src/components/Button';
@@ -18,10 +19,8 @@ import Input from '@/src/components/Input';
 
 const LoginScreen:FC = () => {
 
-  const { state, dispatch} = useNotificationStore();
-
   const { colors } = useAppTheme();
-  const { setUsername } = useAppState();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const [draftUsername, setDraftUsername] = useState('');
 
@@ -29,14 +28,11 @@ const LoginScreen:FC = () => {
 
   const handleContinue = () => {
     
-    dispatch({ type: 'ADD_NOTIFICATION', payload: `User ${draftUsername.trim()} is attempting to log in.` });
-    console.log('Current notifications state:', state);
-
     if (!canContinue) {
       return;
     }
-    setUsername(draftUsername.trim());
-    //router.replace('/(tabs)');
+    dispatch(logic.settings.actions.setUsername(draftUsername.trim()));
+    router.replace('/(tabs)');
   };
 
   return (

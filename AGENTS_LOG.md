@@ -239,3 +239,11 @@
 - **Description :** Ajout de l'action dédiée `setUsername` et de son exposition
   via l'interface normalisée `logic.settings.actions`.
 - **Commentaire Git suggéré :** `feat: add settings username action`
+
+## 2026-09-04
+
+- **Fichiers :** `package.json`, `package-lock.json`, `app/_layout.tsx`,
+  `src/screens/LoginScreen.tsx`
+- **Description :** Ajout du provider Redux au layout racine et connexion du
+  login au store racine via `logic.settings.actions.setUsername`.
+- **Commentaire Git suggéré :** `feat: connect login to root Redux store`

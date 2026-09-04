@@ -29,6 +29,7 @@ import settingsReducer, {
   updateSettings,
 } from './settings/settings.slice';
 import { logMiddleware } from './logger.middleware';
+import devtoolsEnhancer from 'redux-devtools-expo-dev-plugin';
 
 export const rootStore = configureStore({
   reducer: {
@@ -37,6 +38,7 @@ export const rootStore = configureStore({
     settings: settingsReducer,
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware().concat(logMiddleware),
+  enhancers: (getDefaultEnhancers) => getDefaultEnhancers().concat(devtoolsEnhancer()),
 });
 
 export type RootState = ReturnType<typeof rootStore.getState>;
