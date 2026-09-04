@@ -27,6 +27,7 @@ import settingsReducer, {
   setSettings,
   updateSettings,
 } from './settings/settings.slice';
+import { logMiddleware } from './logger.middleware';
 
 export const rootStore = configureStore({
   reducer: {
@@ -34,6 +35,7 @@ export const rootStore = configureStore({
     products: productsReducer,
     settings: settingsReducer,
   },
+  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(logMiddleware),
 });
 
 export type RootState = ReturnType<typeof rootStore.getState>;

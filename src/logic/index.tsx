@@ -6,6 +6,7 @@ import {
 import { useEffect, useState } from 'react';
 
 import devToolsEnhancer from 'redux-devtools-expo-dev-plugin';
+import { logMiddleware } from './logger.middleware';
 
 const notificationState = {
     messages: '',
@@ -38,14 +39,6 @@ const reducer: Reducer<NotificationState, NotificationAction> =
     };
 
 
-const logMiddleware: Middleware<{}, NotificationState> =
-    store => next => action => {
-
-        console.log('Middleware State:', store.getState());
-        console.log('Middleware Dispatching action:', action);
-
-        return next(action);
-    };
 
 
 export const notificationStore = configureStore({
@@ -59,11 +52,9 @@ export const notificationStore = configureStore({
 
 });
 
-
 export type RootState =  ReturnType<typeof notificationStore.getState>;
 
 export type AppDispatch = typeof notificationStore.dispatch;
-
 
 export const useNotificationStore = () => {
 
