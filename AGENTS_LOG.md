@@ -286,3 +286,10 @@
 - **Description :** Synchronisation de la slice products avec les réponses RTK
   Query réussies pour la liste et les mutations CRUD de l'API JSON Server.
 - **Commentaire Git suggéré :** `feat: sync products slice with API results`
+
+## 2026-09-04
+
+- **Fichier :** `src/screens/SplashScreen.tsx`
+- **Description :** Chargement du catalogue via RTK Query pendant le splash et
+  attente de la fin de la requête avant la navigation.
+- **Commentaire Git suggéré :** `feat: load products during splash screen`
