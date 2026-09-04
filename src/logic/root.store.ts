@@ -2,9 +2,12 @@ import { configureStore } from '@reduxjs/toolkit';
 
 import notificationsReducer, {
   addNotification,
+  postNotification,
   removeNotification,
+  selectNotificationError,
   selectNotificationById,
   selectNotifications,
+  selectNotificationRequestStatus,
   updateNotification,
 } from './notifications/notifications.slice';
 import productsReducer, {
@@ -56,7 +59,13 @@ export type AppDispatch = typeof rootStore.dispatch;
 export const logic = {
   notifications: {
     actions: { addNotification, updateNotification, removeNotification },
-    selectors: { selectNotifications, selectNotificationById },
+    thunks: { postNotification },
+    selectors: {
+      selectNotifications,
+      selectNotificationById,
+      selectNotificationRequestStatus,
+      selectNotificationError,
+    },
   },
   products: {
     actions: { addProduct, updateProduct, removeProduct },

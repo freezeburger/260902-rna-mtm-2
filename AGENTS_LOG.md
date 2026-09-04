@@ -223,3 +223,12 @@
 - **Description :** Ajout du registre `logic` regroupant les actions et
   sélecteurs de chaque domaine sous une interface uniforme.
 - **Commentaire Git suggéré :** `feat: expose normalized domain logic access`
+
+## 2026-09-04
+
+- **Fichiers :** `mock-api-data/data.json`, `src/logic/notifications/notifications.slice.ts`,
+  `src/logic/root.store.ts`
+- **Description :** Ajout d'un exemple `createAsyncThunk` postant une notification
+  vers l'API mock, de la gestion pending/fulfilled/rejected et de son accès
+  normalisé via `logic.notifications.thunks`.
+- **Commentaire Git suggéré :** `feat: add notification async thunk example`
