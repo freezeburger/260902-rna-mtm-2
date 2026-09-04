@@ -25,6 +25,7 @@ import settingsReducer, {
   selectSettings,
   selectUsername,
   setSettings,
+  setUsername,
   updateSettings,
 } from './settings/settings.slice';
 import { logMiddleware } from './logger.middleware';
@@ -74,7 +75,7 @@ export const logic = {
     selectors: { selectProducts, selectProductById },
   },
   settings: {
-    actions: { setSettings, updateSettings, resetSettings },
+    actions: { setUsername, setSettings, updateSettings, resetSettings },
     selectors: {
       selectSettings,
       selectUsername,

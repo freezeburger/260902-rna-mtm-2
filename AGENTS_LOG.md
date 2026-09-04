@@ -232,3 +232,10 @@
   vers l'API mock, de la gestion pending/fulfilled/rejected et de son accès
   normalisé via `logic.notifications.thunks`.
 - **Commentaire Git suggéré :** `feat: add notification async thunk example`
+
+## 2026-09-04
+
+- **Fichiers :** `src/logic/settings/settings.slice.ts`, `src/logic/root.store.ts`
+- **Description :** Ajout de l'action dédiée `setUsername` et de son exposition
+  via l'interface normalisée `logic.settings.actions`.
+- **Commentaire Git suggéré :** `feat: add settings username action`

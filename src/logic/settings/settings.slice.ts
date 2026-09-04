@@ -8,7 +8,7 @@ import type { UserSettings } from '@/src/types';
  * const username = useSelector(selectUsername);
  * const settings = useSelector(selectSettings);
  * const dispatch = useDispatch<AppDispatch>();
- * dispatch(updateSettings({ darkModeEnabled: true }));
+ * dispatch(setUsername('Renaud'));
  *
  * Non-React subscription:
  *
@@ -30,6 +30,9 @@ const settingsSlice = createSlice({
   name: 'settings',
   initialState,
   reducers: {
+    setUsername(state, action: PayloadAction<string>) {
+      state.username = action.payload;
+    },
     setSettings(_state, action: PayloadAction<SettingsState>) {
       return action.payload;
     },
@@ -49,7 +52,7 @@ const settingsSlice = createSlice({
   },
 });
 
-export const { setSettings, updateSettings, resetSettings } = settingsSlice.actions;
+export const { setUsername, setSettings, updateSettings, resetSettings } = settingsSlice.actions;
 
 export const {
   selectSettings,
