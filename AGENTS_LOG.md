@@ -176,3 +176,50 @@
 - **Description :** Ajout d'une bordure gris clair et d'une ombre portée au
   conteneur de `SwipeCard` pour correspondre au rendu graphique de la maquette.
 - **Commentaire Git suggéré :** `style: add border and shadow to swipe card`
+
+## 2026-09-04
+
+- **Fichiers :** `src/logic/root.store.ts`, `src/logic/notifications/notifications.slice.ts`,
+  `src/logic/products/products.slice.ts`, `src/logic/settings/settings.slice.ts`
+- **Description :** Ajout de slices Redux Toolkit CRUD isolés par domaine et
+  d'un store racine, sans modifier l'entrée logique existante ni connecter les composants.
+- **Commentaire Git suggéré :** `feat: add domain CRUD logic slices`
+
+## 2026-09-04
+
+- **Fichiers :** `src/logic/notifications/notifications.slice.ts`,
+  `src/logic/products/products.slice.ts`, `src/logic/settings/settings.slice.ts`
+- **Description :** Ajout de sélecteurs typés par domaine pour exposer les
+  collections, les éléments par identifiant et les préférences.
+- **Commentaire Git suggéré :** `feat: add domain slice selectors`
+
+## 2026-09-04
+
+- **Fichiers :** `src/logic/notifications/notifications.slice.ts`,
+  `src/logic/products/products.slice.ts`, `src/logic/settings/settings.slice.ts`
+- **Description :** Déplacement des sélecteurs dans la clé `selectors` des
+  configurations `createSlice` et export des sélecteurs générés.
+- **Commentaire Git suggéré :** `refactor: define selectors in domain slices`
+
+## 2026-09-04
+
+- **Fichiers :** `src/logic/notifications/notifications.slice.ts`,
+  `src/logic/products/products.slice.ts`, `src/logic/settings/settings.slice.ts`
+- **Description :** Ajout d'exemples commentés d'utilisation des sélecteurs dans
+  les composants, sans connexion aux composants existants.
+- **Commentaire Git suggéré :** `docs: add slice selector usage examples`
+
+## 2026-09-04
+
+- **Fichiers :** `src/logic/notifications/notifications.slice.ts`,
+  `src/logic/products/products.slice.ts`, `src/logic/settings/settings.slice.ts`
+- **Description :** Remplacement des exemples brefs par des commentaires de tête
+  détaillant la sélection, le dispatch et l'abonnement hors React à chaque slice.
+- **Commentaire Git suggéré :** `docs: explain domain slice consumption`
+
+## 2026-09-04
+
+- **Fichier :** `src/logic/root.store.ts`
+- **Description :** Ajout du registre `logic` regroupant les actions et
+  sélecteurs de chaque domaine sous une interface uniforme.
+- **Commentaire Git suggéré :** `feat: expose normalized domain logic access`
