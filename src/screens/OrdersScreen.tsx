@@ -22,7 +22,9 @@ import NumericInput from '@/src/components/NumericInput';
 
 const OrdersScreen:FC = () => {
   const { colors } = useAppTheme();
+
   const router = useRouter();
+  
   const { selectedProduct, quantity, total, canPlaceOrder, setQuantity, placeOrder } = useOrderSummary();
 
   const handlePlaceOrder = () => {

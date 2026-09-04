@@ -23,6 +23,7 @@ import type { Product } from '@/src/types';
 
 const FavoritesScreen:FC = () => {
   const { colors } = useAppTheme();
+  
   const dispatch = useDispatch<AppDispatch>();
   const favorites = useSelector(logic.products.selectors.selectFavoriteProducts);
   const defaultOrderQuantity = useSelector(

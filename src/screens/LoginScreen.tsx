@@ -20,10 +20,12 @@ import Input from '@/src/components/Input';
 const LoginScreen:FC = () => {
 
   const { colors } = useAppTheme();
-  const dispatch = useDispatch<AppDispatch>();
+  
   const router = useRouter();
-  const [draftUsername, setDraftUsername] = useState('');
 
+  const dispatch = useDispatch<AppDispatch>();
+  
+  const [draftUsername, setDraftUsername] = useState('');
   const canContinue = draftUsername.trim().length > 0;
 
   const handleContinue = () => {

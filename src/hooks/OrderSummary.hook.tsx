@@ -14,7 +14,9 @@ import { type AppDispatch, logic, type RootState } from '@/src/logic/root.store'
  * const { selectedProduct, quantity, total, canPlaceOrder, placeOrder } = useOrderSummary();
  */
 export const useOrderSummary = () => {
+
   const dispatch = useDispatch<AppDispatch>();
+  
   const selectedProductId = useSelector(logic.orders.selectors.selectSelectedProductId);
   const selectedProduct = useSelector((state: RootState) =>
     selectedProductId

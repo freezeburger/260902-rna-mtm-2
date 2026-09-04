@@ -24,7 +24,9 @@ import Switch from '@/src/components/Switch';
 
 const SettingsScreen:FC = () => {
   const { colors } = useAppTheme();
+
   const dispatch = useDispatch<AppDispatch>();
+  
   const settings = useSelector(logic.settings.selectors.selectSettings);
 
   const [draftUsername, setDraftUsername] = useState(settings.username);

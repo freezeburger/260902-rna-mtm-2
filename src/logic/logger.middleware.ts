@@ -1,4 +1,5 @@
 import { Middleware } from "@reduxjs/toolkit";
+import { logic } from "./root.store";
 
 export const logMiddleware: Middleware<{}, any> =
     store => next => action => {
@@ -6,5 +7,18 @@ export const logMiddleware: Middleware<{}, any> =
         console.log('Middleware State:', store.getState());
         console.log('Middleware Dispatching action:', action);
 
-        return next(action);
+        next(action);
+
+        if((action as any).type.includes('settings/')) {
+            console.log('Middleware Action is related to settings:', action);
+
+            store.dispatch(
+                logic.notifications.actions.addNotification({
+                    message: 'Settings have been updated.',
+                    id: Date.now().toString(),
+                })
+            )
+        }
+
+        return ;
     };

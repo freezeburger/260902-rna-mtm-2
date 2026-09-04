@@ -21,7 +21,9 @@ const SPLASH_DURATION = 1400;
 
 const SplashScreen:FC = () => {
   const { colors } = useAppTheme();
+  
   const username = useSelector(logic.settings.selectors.selectUsername);
+ 
   const router = useRouter();
 
   useEffect(() => {

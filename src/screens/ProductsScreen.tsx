@@ -22,6 +22,7 @@ import ListItem from '@/src/components/ListItem';
 
 const ProductsScreen:FC = () => {
   const { colors } = useAppTheme();
+
   const dispatch = useDispatch<AppDispatch>();
   const products = useSelector(logic.products.selectors.selectProducts);
   const favoriteProductIds = useSelector(
@@ -33,7 +34,9 @@ const ProductsScreen:FC = () => {
   const defaultOrderQuantity = useSelector(
     logic.settings.selectors.selectDefaultOrderQuantity,
   );
+
   const router = useRouter();
+  
   const [query, setQuery] = useState('');
 
   const filteredProducts = useMemo(() => {
