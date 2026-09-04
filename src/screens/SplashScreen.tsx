@@ -10,7 +10,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 /** Hooks Imports */
-import { useAppState, useAppTheme } from '@/src/hooks';
+import { useAppTheme } from '@/src/hooks';
+import { logic } from '@/src/logic/root.store';
+import { useSelector } from 'react-redux';
 
 /** Local Imports */
 
@@ -19,16 +21,16 @@ const SPLASH_DURATION = 1400;
 
 const SplashScreen:FC = () => {
   const { colors } = useAppTheme();
-  const { state } = useAppState();
+  const username = useSelector(logic.settings.selectors.selectUsername);
   const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      router.replace(state.username.trim() ? '/(tabs)' : '/login');
+      router.replace(username.trim() ? '/(tabs)' : '/login');
     }, SPLASH_DURATION);
 
     return () => clearTimeout(timer);
-  }, [router, state.username]);
+  }, [router, username]);
 
   return (
     <View style={{ alignItems: 'center', backgroundColor: colors.background, flex: 1, justifyContent: 'center' }}>

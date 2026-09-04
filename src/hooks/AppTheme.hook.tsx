@@ -1,7 +1,8 @@
 
 /** Local Imports */
 import { Colors } from '@/constants/theme';
-import { useAppState } from '@/src/hooks/AppState.hook';
+import { useDispatch, useSelector } from 'react-redux';
+import { type AppDispatch, logic } from '@/src/logic/root.store';
 
 /**
  * Exposes the app-wide color palette driven by the `darkModeEnabled`
@@ -15,12 +16,13 @@ import { useAppState } from '@/src/hooks/AppState.hook';
  * const { colors, isDark, toggleDarkMode } = useAppTheme();
  */
 export const useAppTheme = () => {
-  const { state, updateSettings } = useAppState();
+  const dispatch = useDispatch<AppDispatch>();
+  const isDark = useSelector(logic.settings.selectors.selectDarkModeEnabled);
 
-  const isDark = state.darkModeEnabled;
   const colors = isDark ? Colors.dark : Colors.light;
 
-  const toggleDarkMode = () => updateSettings({ darkModeEnabled: !isDark });
+  const toggleDarkMode = () =>
+    dispatch(logic.settings.actions.updateSettings({ darkModeEnabled: !isDark }));
 
   return { colors, isDark, toggleDarkMode };
 };

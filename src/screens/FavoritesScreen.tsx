@@ -1,6 +1,6 @@
 
 /** React Imports */
-import React, { type FC, useMemo } from 'react';
+import React, { type FC } from 'react';
 
 /** React Native Imports */
 import { FlatList, StyleSheet } from 'react-native';
@@ -8,27 +8,35 @@ import { FlatList, StyleSheet } from 'react-native';
 /** External Libraries Imports */
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useDispatch, useSelector } from 'react-redux';
 
 /** Hooks Imports */
-import { useAppState, useAppTheme } from '@/src/hooks';
+import { useAppTheme } from '@/src/hooks';
+import { type AppDispatch, logic } from '@/src/logic/root.store';
 
 /** Local Imports */
 import Button from '@/src/components/Button';
 import EmptyState from '@/src/components/EmptyState';
 import Header from '@/src/components/Header';
 import ListItem from '@/src/components/ListItem';
-import { selectFavoriteProducts } from '@/src/store/selectors';
 import type { Product } from '@/src/types';
 
 const FavoritesScreen:FC = () => {
   const { colors } = useAppTheme();
-  const { state, selectProductForOrder } = useAppState();
+  const dispatch = useDispatch<AppDispatch>();
+  const favorites = useSelector(logic.products.selectors.selectFavoriteProducts);
+  const defaultOrderQuantity = useSelector(
+    logic.settings.selectors.selectDefaultOrderQuantity,
+  );
   const router = useRouter();
 
-  const favorites = useMemo(() => selectFavoriteProducts(state), [state]);
-
   const handleOrder = (product: Product) => {
-    selectProductForOrder(product.id);
+    dispatch(
+      logic.orders.actions.selectProductForOrder({
+        productId: product.id,
+        quantity: defaultOrderQuantity,
+      }),
+    );
     router.push('/(tabs)/orders');
   };
 

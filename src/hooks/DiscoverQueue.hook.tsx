@@ -1,7 +1,7 @@
 
-/** Local Imports */
-import { useAppState } from '@/src/hooks/AppState.hook';
-import { selectCurrentDiscoverProduct, selectDiscoverRemainingCount } from '@/src/store/selectors';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { type AppDispatch, logic } from '@/src/logic/root.store';
 
 /**
  * Orchestrates the Discover screen: current product, remaining count and the
@@ -14,16 +14,16 @@ import { selectCurrentDiscoverProduct, selectDiscoverRemainingCount } from '@/sr
  * const { currentProduct, isDone, next, favorite, ignore } = useDiscoverQueue();
  */
 export const useDiscoverQueue = () => {
-  const { state, discoverNext, discoverRestart, addFavorite, ignoreProduct } = useAppState();
+  const dispatch = useDispatch<AppDispatch>();
+  const currentProduct = useSelector(logic.products.selectors.selectCurrentDiscoverProduct);
+  const remainingCount = useSelector(logic.products.selectors.selectDiscoverRemainingCount);
 
-  const currentProduct = selectCurrentDiscoverProduct(state);
-  const remainingCount = selectDiscoverRemainingCount(state);
   const isDone = !currentProduct;
 
-  const next = () => discoverNext();
-  const favorite = () => currentProduct && addFavorite(currentProduct.id);
-  const ignore = () => currentProduct && ignoreProduct(currentProduct.id);
-  const restart = () => discoverRestart();
+  const next = () => dispatch(logic.products.actions.discoverNext());
+  const favorite = () => currentProduct && dispatch(logic.products.actions.addFavorite(currentProduct.id));
+  const ignore = () => currentProduct && dispatch(logic.products.actions.ignoreProduct(currentProduct.id));
+  const restart = () => dispatch(logic.products.actions.discoverRestart());
 
   return { currentProduct, remainingCount, isDone, next, favorite, ignore, restart };
 };

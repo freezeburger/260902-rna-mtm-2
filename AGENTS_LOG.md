@@ -254,3 +254,14 @@
 - **Description :** Connexion de l'écran Settings au store Redux racine avec les
   sélecteurs et actions `logic.settings`, en conservant les brouillons locaux.
 - **Commentaire Git suggéré :** `feat: connect settings to root Redux store`
+
+## 2026-09-04
+
+- **Fichiers :** `app/_layout.tsx`, `src/hooks/AppTheme.hook.tsx`,
+  `src/hooks/DiscoverQueue.hook.tsx`, `src/hooks/OrderSummary.hook.tsx`,
+  `src/logic/orders/orders.slice.ts`, `src/logic/products/products.slice.ts`,
+  `src/logic/root.store.ts`, `src/screens/{Splash,Discover,Favorites,Products,Orders}Screen.tsx`
+- **Description :** Migration complète des écrans vers le store Redux racine,
+  avec des domaines produits et commandes pour les interactions de découverte,
+  favoris et commandes; suppression du provider de contexte obsolète.
+- **Commentaire Git suggéré :** `refactor: migrate screens to root Redux store`

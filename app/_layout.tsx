@@ -6,7 +6,6 @@ import 'react-native-reanimated';
 
 import { useAppTheme } from '@/src/hooks';
 import { rootStore } from '@/src/logic/root.store';
-import { AppStateProvider } from '@/src/store/AppStateContext';
 
 export const unstable_settings = {
   anchor: '(tabs)',
@@ -30,9 +29,7 @@ function RootNavigation() {
 export default function RootLayout() {
   return (
     <Provider store={rootStore}>
-      <AppStateProvider>
-        <RootNavigation />
-      </AppStateProvider>
+      <RootNavigation />
     </Provider>
   );
 }

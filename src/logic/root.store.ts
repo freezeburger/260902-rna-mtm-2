@@ -10,11 +10,33 @@ import notificationsReducer, {
   selectNotificationRequestStatus,
   updateNotification,
 } from './notifications/notifications.slice';
+import ordersReducer, {
+  placeOrder,
+  selectOrderDraft,
+  selectOrderQuantity,
+  selectOrders,
+  selectProductForOrder,
+  selectSelectedProductId,
+  setOrderQuantity,
+} from './orders/orders.slice';
 import productsReducer, {
+  addFavorite,
   addProduct,
+  discoverNext,
+  discoverRestart,
+  ignoreProduct,
   removeProduct,
+  removeFavorite,
+  selectCurrentDiscoverProduct,
+  selectDiscoverRemainingCount,
+  selectFavoriteProducts,
+  selectFavoriteProductIds,
+  selectIgnoredProductIds,
+  selectIsFavorite,
+  selectIsIgnored,
   selectProductById,
   selectProducts,
+  unignoreProduct,
   updateProduct,
 } from './products/products.slice';
 import settingsReducer, {
@@ -34,6 +56,7 @@ import devtoolsEnhancer from 'redux-devtools-expo-dev-plugin';
 export const rootStore = configureStore({
   reducer: {
     notifications: notificationsReducer,
+    orders: ordersReducer,
     products: productsReducer,
     settings: settingsReducer,
   },
@@ -73,8 +96,32 @@ export const logic = {
     },
   },
   products: {
-    actions: { addProduct, updateProduct, removeProduct },
-    selectors: { selectProducts, selectProductById },
+    actions: {
+      addProduct,
+      updateProduct,
+      removeProduct,
+      discoverNext,
+      discoverRestart,
+      addFavorite,
+      removeFavorite,
+      ignoreProduct,
+      unignoreProduct,
+    },
+    selectors: {
+      selectProducts,
+      selectProductById,
+      selectFavoriteProductIds,
+      selectIgnoredProductIds,
+      selectFavoriteProducts,
+      selectIsFavorite,
+      selectIsIgnored,
+      selectCurrentDiscoverProduct,
+      selectDiscoverRemainingCount,
+    },
+  },
+  orders: {
+    actions: { selectProductForOrder, setOrderQuantity, placeOrder },
+    selectors: { selectOrderDraft, selectSelectedProductId, selectOrderQuantity, selectOrders },
   },
   settings: {
     actions: { setUsername, setSettings, updateSettings, resetSettings },

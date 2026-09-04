@@ -8,34 +8,45 @@ import { FlatList, StyleSheet, View } from 'react-native';
 /** External Libraries Imports */
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { useDispatch, useSelector } from 'react-redux';
 
 /** Hooks Imports */
-import { useAppState, useAppTheme } from '@/src/hooks';
+import { useAppTheme } from '@/src/hooks';
+import { type AppDispatch, logic } from '@/src/logic/root.store';
 
 /** Local Imports */
 import EmptyState from '@/src/components/EmptyState';
 import Header from '@/src/components/Header';
 import Input from '@/src/components/Input';
 import ListItem from '@/src/components/ListItem';
-import { selectIsFavorite, selectIsIgnored } from '@/src/store/selectors';
 
 const ProductsScreen:FC = () => {
   const { colors } = useAppTheme();
-  const { state, addFavorite, removeFavorite, ignoreProduct, unignoreProduct, selectProductForOrder } = useAppState();
+  const dispatch = useDispatch<AppDispatch>();
+  const products = useSelector(logic.products.selectors.selectProducts);
+  const favoriteProductIds = useSelector(
+    logic.products.selectors.selectFavoriteProductIds,
+  );
+  const ignoredProductIds = useSelector(
+    logic.products.selectors.selectIgnoredProductIds,
+  );
+  const defaultOrderQuantity = useSelector(
+    logic.settings.selectors.selectDefaultOrderQuantity,
+  );
   const router = useRouter();
   const [query, setQuery] = useState('');
 
   const filteredProducts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     if (!normalizedQuery) {
-      return state.products;
+      return products;
     }
-    return state.products.filter((product) => product.title.toLowerCase().includes(normalizedQuery));
-  }, [state.products, query]);
+    return products.filter((product) => product.title.toLowerCase().includes(normalizedQuery));
+  }, [products, query]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['top']}>
-      <Header title="Products" subtitle={`${state.products.length} products in catalog`} />
+      <Header title="Products" subtitle={`${products.length} products in catalog`} />
       <View style={styles.searchWrapper}>
         <Input
           label="Search"
@@ -55,14 +66,19 @@ const ProductsScreen:FC = () => {
           renderItem={({ item }) => (
             <ListItem
               product={item}
-              isFavorite={selectIsFavorite(state, item.id)}
-              isIgnored={selectIsIgnored(state, item.id)}
-              onFavorite={() => addFavorite(item.id)}
-              onUnfavorite={() => removeFavorite(item.id)}
-              onIgnore={() => ignoreProduct(item.id)}
-              onUnignore={() => unignoreProduct(item.id)}
+              isFavorite={favoriteProductIds.includes(item.id)}
+              isIgnored={ignoredProductIds.includes(item.id)}
+              onFavorite={() => dispatch(logic.products.actions.addFavorite(item.id))}
+              onUnfavorite={() => dispatch(logic.products.actions.removeFavorite(item.id))}
+              onIgnore={() => dispatch(logic.products.actions.ignoreProduct(item.id))}
+              onUnignore={() => dispatch(logic.products.actions.unignoreProduct(item.id))}
               onOrder={() => {
-                selectProductForOrder(item.id);
+                dispatch(
+                  logic.orders.actions.selectProductForOrder({
+                    productId: item.id,
+                    quantity: defaultOrderQuantity,
+                  }),
+                );
                 router.push('/(tabs)/orders');
               }}
             />

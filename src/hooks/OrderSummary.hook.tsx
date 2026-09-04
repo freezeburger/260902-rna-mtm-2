@@ -1,7 +1,7 @@
 
-/** Local Imports */
-import { useAppState } from '@/src/hooks/AppState.hook';
-import { selectOrderTotal, selectSelectedProduct } from '@/src/store/selectors';
+import { useDispatch, useSelector } from 'react-redux';
+
+import { type AppDispatch, logic, type RootState } from '@/src/logic/root.store';
 
 /**
  * Orchestrates the Orders screen: selected product, quantity, computed total
@@ -14,18 +14,25 @@ import { selectOrderTotal, selectSelectedProduct } from '@/src/store/selectors';
  * const { selectedProduct, quantity, total, canPlaceOrder, placeOrder } = useOrderSummary();
  */
 export const useOrderSummary = () => {
-  const { state, setOrderQuantity, placeOrder } = useAppState();
+  const dispatch = useDispatch<AppDispatch>();
+  const selectedProductId = useSelector(logic.orders.selectors.selectSelectedProductId);
+  const selectedProduct = useSelector((state: RootState) =>
+    selectedProductId
+      ? logic.products.selectors.selectProductById(state, selectedProductId)
+      : undefined,
+  );
+  const quantity = useSelector(logic.orders.selectors.selectOrderQuantity);
 
-  const selectedProduct = selectSelectedProduct(state);
-  const total = selectOrderTotal(state);
-  const canPlaceOrder = Boolean(selectedProduct) && state.orderQuantity > 0;
+  const total = selectedProduct ? selectedProduct.price * quantity : 0;
+  const canPlaceOrder = Boolean(selectedProduct) && quantity > 0;
 
   return {
     selectedProduct,
-    quantity: state.orderQuantity,
+    quantity,
     total,
     canPlaceOrder,
-    setQuantity: setOrderQuantity,
-    placeOrder,
+    setQuantity: (nextQuantity: number) =>
+      dispatch(logic.orders.actions.setOrderQuantity(nextQuantity)),
+    placeOrder: () => selectedProduct && dispatch(logic.orders.actions.placeOrder(selectedProduct)),
   };
 };
