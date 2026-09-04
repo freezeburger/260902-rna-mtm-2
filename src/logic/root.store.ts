@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 
+import { productsApi } from './api/products.api';
 import notificationsReducer, {
   addNotification,
   postNotification,
@@ -55,12 +56,14 @@ import devtoolsEnhancer from 'redux-devtools-expo-dev-plugin';
 
 export const rootStore = configureStore({
   reducer: {
+    [productsApi.reducerPath]: productsApi.reducer,
     notifications: notificationsReducer,
     orders: ordersReducer,
     products: productsReducer,
     settings: settingsReducer,
   },
-  middleware: getDefaultMiddleware => getDefaultMiddleware().concat(logMiddleware),
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware().concat(logMiddleware, productsApi.middleware),
   enhancers: (getDefaultEnhancers) => getDefaultEnhancers().concat(devtoolsEnhancer()),
 });
 
@@ -85,6 +88,9 @@ export type AppDispatch = typeof rootStore.dispatch;
  * unsubscribe();
  */
 export const logic = {
+  api: {
+    products: productsApi,
+  },
   notifications: {
     actions: { addNotification, updateNotification, removeNotification },
     thunks: { postNotification },

@@ -265,3 +265,10 @@
   avec des domaines produits et commandes pour les interactions de découverte,
   favoris et commandes; suppression du provider de contexte obsolète.
 - **Commentaire Git suggéré :** `refactor: migrate screens to root Redux store`
+
+## 2026-09-04
+
+- **Fichiers :** `src/logic/api/products.api.ts`, `src/logic/root.store.ts`
+- **Description :** Ajout d'un client RTK Query pour l'API JSON Server products,
+  avec requêtes de liste et par identifiant, mutations CRUD et invalidation du cache.
+- **Commentaire Git suggéré :** `feat: add products RTK Query client`

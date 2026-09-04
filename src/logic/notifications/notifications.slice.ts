@@ -52,6 +52,7 @@ export const postNotification = createAsyncThunk<
   CreateNotification,
   { rejectValue: string }
 >('notifications/postNotification', async (notification, { rejectWithValue }) => {
+ 
   const response = await fetch(NOTIFICATIONS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
